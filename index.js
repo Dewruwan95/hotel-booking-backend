@@ -4,6 +4,7 @@ import userRouter from "./routes/usersRoute.js";
 import mongoose from "mongoose";
 import eventRouter from "./routes/eventRoute.js";
 import jwt from "jsonwebtoken";
+import categoryRouter from "./routes/categoryRoute.js";
 
 const app = express();
 
@@ -40,6 +41,7 @@ mongoose
 
 app.use("/api/users", userRouter);
 app.use("/api/events", eventRouter);
+app.use("/api/categories", categoryRouter);
 
 app.listen(5000, (req, res) => {
   console.log("Server is running on port 5000");

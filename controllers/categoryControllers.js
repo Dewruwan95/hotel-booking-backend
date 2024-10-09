@@ -1,8 +1,9 @@
-import Category from "../models/category";
+import Category from "../models/category.js";
 
 // create category -------------------
 export function createCategory(req, res) {
-  const category = req.user;
+  const category = req.body;
+  console.log(category);
 
   const newCategory = new Category(category);
 
