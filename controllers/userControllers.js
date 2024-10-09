@@ -1,10 +1,19 @@
 import User from "../models/user.js";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 // create user -------------------
 export function createUser(req, res) {
   const user = req.body;
+
+  // hashing user password
+  const password = user.password;
+  const passwordHash = bcrypt.hashSync(user.password, 10);
+
+  user.password = passwordHash;
+
   const newUser = new User(user);
+
   newUser
     .save()
     .then(() => {
@@ -73,29 +82,40 @@ export function deleteUser(req, res) {
 // login users -------------------
 export function loginUser(req, res) {
   const credentials = req.body;
+
   User.findOne({
     email: credentials.email,
-    password: credentials.password,
   }).then((user) => {
-    if (user == null) {
+    if (!user) {
       res.json({
         message: "User not found",
       });
     } else {
-      const payload = {
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        type: user.type,
-      };
+      const isPasswordValid = bcrypt.compareSync(
+        credentials.password,
+        user.password
+      );
 
-      // sign in with payload and secret key
-      const token = jwt.sign(payload, "secret", { expiresIn: "1h" });
-      res.json({
-        message: "User found",
-        user: user,
-        toket: token,
-      });
+      if (isPasswordValid) {
+        const payload = {
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          type: user.type,
+        };
+
+        // sign in with payload and secret key
+        const token = jwt.sign(payload, "secret", { expiresIn: "1h" });
+        res.json({
+          message: "User found",
+          user: user,
+          toket: token,
+        });
+      } else {
+        res.status(403).json({
+          message: "Incorrect Password",
+        });
+      }
     }
   });
 }
