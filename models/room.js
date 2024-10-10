@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import Category from "./category";
 
 const roomSchema = mongoose.Schema({
   roomNo: {
@@ -8,7 +7,7 @@ const roomSchema = mongoose.Schema({
     unique: true,
   },
   category: {
-    type: {},
+    type: String,
     required: true,
   },
   description: {
@@ -17,7 +16,7 @@ const roomSchema = mongoose.Schema({
   },
   maxGuest: {
     type: Number,
-    required: true``,
+    required: true,
   },
   photos: {
     type: Object,
