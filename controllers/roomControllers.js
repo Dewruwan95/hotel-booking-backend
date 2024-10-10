@@ -1,5 +1,6 @@
 import Room from "../models/room.js";
 
+// create room function ---------------
 export function createRoom(req, res) {
   const room = req.body;
   const newRoom = new Room(room);
@@ -16,4 +17,13 @@ export function createRoom(req, res) {
         message: "Room creation failed",
       });
     });
+}
+
+// get rooms function ---------------
+export function getRooms(req, res) {
+  Room.find().then((categories) => {
+    res.json({
+      list: categories,
+    });
+  });
 }
