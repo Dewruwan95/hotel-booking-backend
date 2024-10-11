@@ -108,10 +108,9 @@ export function loginUser(req, res) {
         message: "User not found",
       });
     } else {
-      const isPasswordValid = bcrypt.compareSync(
-        credentials.password,
-        user.password
-      );
+      const saltingText = user.saltingText;
+      const password = credentials.password + saltingText;
+      const isPasswordValid = bcrypt.compareSync(password, user.password);
 
       if (isPasswordValid) {
         const payload = {
