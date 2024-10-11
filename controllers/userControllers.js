@@ -6,11 +6,15 @@ import bcrypt from "bcrypt";
 export function createUser(req, res) {
   const user = req.body;
 
-  // hashing user password
+  // salting & hashing user password
   const password = user.password;
-  const passwordHash = bcrypt.hashSync(user.password, 10);
+  const saltingText = generateSaltingText();
+  const saltedPassword = password + saltingText;
+
+  const passwordHash = bcrypt.hashSync(saltedPassword, 10);
 
   user.password = passwordHash;
+  user.saltingText = saltingText;
 
   const newUser = new User(user);
 
@@ -34,6 +38,19 @@ export function getUsers(req, res) {
       list: users,
     });
   });
+}
+
+// salting charactor generation -------------------
+function generateSaltingText() {
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const numberOfCharacters = 3;
+  let result = "";
+  const charactersLength = characters.length;
+  for (let i = 0; i < numberOfCharacters; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
 }
 
 // update users -------------------

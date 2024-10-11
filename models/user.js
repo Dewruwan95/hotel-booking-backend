@@ -10,6 +10,10 @@ const userSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  saltingText: {
+    type: String,
+    required: true,
+  },
   firstName: {
     type: String,
     required: true,
