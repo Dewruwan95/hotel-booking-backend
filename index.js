@@ -6,19 +6,20 @@ import eventRouter from "./routes/eventRoute.js";
 import jwt from "jsonwebtoken";
 import categoryRouter from "./routes/categoryRoute.js";
 import roomRouter from "./routes/roomRoute.js";
+import dotenv from "dotenv";
 
+dotenv.config();
 const app = express();
 
 app.use(bodyParser.json());
 
-const connectionString =
-  "mongodb+srv://user1:1234@cluster0.kk17j.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const connectionString = process.env.MONGODB_URL;
 
 app.use((req, res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
 
   if (token) {
-    jwt.verify(token, "secret", (err, decoded) => {
+    jwt.verify(token, process.env.HASHING_KEY, (err, decoded) => {
       if (decoded != null) {
         req.user = decoded;
         next();

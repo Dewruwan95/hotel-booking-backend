@@ -121,7 +121,9 @@ export function loginUser(req, res) {
         };
 
         // sign in with payload and secret key
-        const token = jwt.sign(payload, "secret", { expiresIn: "10h" });
+        const token = jwt.sign(payload, process.env.HASHING_KEY, {
+          expiresIn: "48h",
+        });
         res.json({
           message: "User found",
           user: user,
