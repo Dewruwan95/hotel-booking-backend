@@ -76,3 +76,37 @@ export function getRoomByNumber(req, res) {
       });
     });
 }
+
+//------------------------------------------------------------------
+///---------------------- update room by number --------------------
+//------------------------------------------------------------------
+export function updateRoomByNumber(req, res) {
+  const user = req.user;
+
+  if (user) {
+    if (user.type == "admin") {
+      const number = req.params.number;
+      Room.updateOne({ roomNo: number }, req.body, { new: true }).then(
+        (result) => {
+          if (result) {
+            res.status(200).json({
+              room: result,
+            });
+          } else {
+            res.status(400).json({
+              message: "Room not found",
+            });
+          }
+        }
+      );
+    } else {
+      res.status(403).json({
+        message: "You dont have permission to create a room",
+      });
+    }
+  } else {
+    res.status(403).json({
+      message: "Please log in before create a room",
+    });
+  }
+}
