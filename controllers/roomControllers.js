@@ -1,6 +1,8 @@
 import Room from "../models/room.js";
 
-// create room function ---------------
+//------------------------------------------------------------------
+///--------------------------- create room -------------------------
+//------------------------------------------------------------------
 export function createRoom(req, res) {
   const user = req.user;
 
@@ -33,11 +35,44 @@ export function createRoom(req, res) {
   }
 }
 
-// get rooms function ---------------
+//------------------------------------------------------------------
+///---------------------------- get rooms --------------------------
+//------------------------------------------------------------------
 export function getRooms(req, res) {
-  Room.find().then((categories) => {
-    res.json({
-      list: categories,
+  Room.find()
+    .then((categories) => {
+      res.json({
+        list: categories,
+      });
+    })
+    .catch(() => {
+      res.status(400).json({
+        message: "Failed to get room",
+      });
     });
-  });
+}
+
+//------------------------------------------------------------------
+///----------------------- get room by number ----------------------
+//------------------------------------------------------------------
+export function getRoomByNumber(req, res) {
+  const number = req.params.number;
+
+  Room.findOne({ roomNo: number })
+    .then((result) => {
+      if (result) {
+        res.status(200).json({
+          room: result,
+        });
+      } else {
+        res.status(400).json({
+          message: "Room not found",
+        });
+      }
+    })
+    .catch(() => {
+      res.status(400).json({
+        message: "Failed to get Room",
+      });
+    });
 }
