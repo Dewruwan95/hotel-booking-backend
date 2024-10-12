@@ -125,12 +125,12 @@ export function deleteCategory(req, res) {
         });
     } else {
       res.status(403).json({
-        message: "you do not have permission to create a category",
+        message: "you do not have permission to delete a category",
       });
     }
   } else {
     res.status(403).json({
-      message: "Please login to create a category",
+      message: "Please login to delete a category",
     });
   }
 }

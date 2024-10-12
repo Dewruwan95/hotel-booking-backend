@@ -1,6 +1,7 @@
 import express from "express";
 import {
   createRoom,
+  deleteRoomByNumber,
   getRoomByNumber,
   getRooms,
   updateRoomByNumber,
@@ -13,5 +14,7 @@ roomRouter.get("/", getRooms);
 
 roomRouter.get("/:number", getRoomByNumber);
 roomRouter.put("/:number", updateRoomByNumber);
+
+roomRouter.delete("/:number", deleteRoomByNumber);
 
 export default roomRouter;

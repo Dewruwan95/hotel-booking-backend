@@ -110,3 +110,35 @@ export function updateRoomByNumber(req, res) {
     });
   }
 }
+
+//------------------------------------------------------------------
+///---------------------- delete room by number --------------------
+//------------------------------------------------------------------
+
+export function deleteRoomByNumber(req, res) {
+  const user = req.user;
+  if (user) {
+    if (user.type == "admin") {
+      const number = req.params.number;
+      Room.findOneAndDelete({ roomNo: number })
+        .then(() => {
+          res.status(200).json({
+            message: "Room deleted successfully",
+          });
+        })
+        .catch(() => {
+          res.status(400).json({
+            message: "Room deletion failed",
+          });
+        });
+    } else {
+      res.status(403).json({
+        message: "you do not have permission to delete a room",
+      });
+    }
+  } else {
+    res.status(403).json({
+      message: "Please login to delete a room",
+    });
+  }
+}
