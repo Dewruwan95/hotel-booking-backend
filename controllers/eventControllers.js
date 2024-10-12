@@ -33,9 +33,15 @@ export function createEvent(req, res) {
 
 // get event ----------------------
 export function getEvents(req, res) {
-  Event.find().then((events) => {
-    res.json({
-      list: events,
+  Event.find()
+    .then((events) => {
+      res.status(200).json({
+        list: events,
+      });
+    })
+    .catch(() => {
+      res.status(400).json({
+        message: "Failed to get events",
+      });
     });
-  });
 }

@@ -69,6 +69,42 @@ export function getCategoryByName(req, res) {
       });
     });
 }
+//------------------------------------------------------------------
+///--------------------- update category by name -------------------
+//------------------------------------------------------------------
+export function updateCategoryByName(req, res) {
+  const user = req.user;
+  if (user) {
+    if (user.type == "admin") {
+      const name = req.params.name;
+      Category.findOneAndUpdate({ name: name }, req.body, { new: true })
+        .then((updatedCategory) => {
+          if (updatedCategory) {
+            res.status(200).json({
+              message: "category updated successfully",
+            });
+          } else {
+            return res.status(404).json({
+              message: "Category Not Found",
+            });
+          }
+        })
+        .catch(() => {
+          res.status(400).json({
+            message: "Category updation failed",
+          });
+        });
+    } else {
+      res.status(403).json({
+        message: "you do not have permission to update a category",
+      });
+    }
+  } else {
+    res.status(403).json({
+      message: "Please login to create a category",
+    });
+  }
+}
 
 // delete category ----------------
 export function deleteCategory(req, res) {
