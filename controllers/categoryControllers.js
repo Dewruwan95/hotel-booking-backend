@@ -47,6 +47,29 @@ export function getCategory(req, res) {
     });
 }
 
+// get category by namee ----------
+export function getCategoryByName(req, res) {
+  const name = req.params.name;
+
+  Category.findOne({ name: name })
+    .then((result) => {
+      if (result) {
+        res.status(200).json({
+          category: result,
+        });
+      } else {
+        res.status(400).json({
+          message: "Category not found",
+        });
+      }
+    })
+    .catch(() => {
+      res.status(400).json({
+        message: "Failed to get category",
+      });
+    });
+}
+
 // delete category ----------------
 export function deleteCategory(req, res) {
   const user = req.user;
