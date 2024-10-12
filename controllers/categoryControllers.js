@@ -34,11 +34,17 @@ export function createCategory(req, res) {
 
 // get category -------------------
 export function getCategory(req, res) {
-  Category.find().then((categories) => {
-    res.json({
-      list: categories,
+  Category.find()
+    .then((categories) => {
+      res.json({
+        list: categories,
+      });
+    })
+    .catch(() => {
+      res.status(400).json({
+        message: "Failed to get categories",
+      });
     });
-  });
 }
 
 // delete category ----------------
