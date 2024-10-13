@@ -1,7 +1,9 @@
 import Category from "../models/category.js";
 import { verifyAdmin } from "../utils/userVerification.js";
 
-// create category -------------------
+//------------------------------------------------------------------
+///------------------------- create category -----------------------
+//------------------------------------------------------------------
 export function createCategory(req, res) {
   if (verifyAdmin(req.user)) {
     const category = req.body;
@@ -26,7 +28,9 @@ export function createCategory(req, res) {
   }
 }
 
-// get category -------------------
+//------------------------------------------------------------------
+///-------------------------- get category -------------------------
+//------------------------------------------------------------------
 export function getCategory(req, res) {
   Category.find()
     .then((categories) => {
@@ -41,7 +45,9 @@ export function getCategory(req, res) {
     });
 }
 
-// get category by namee ----------
+//------------------------------------------------------------------
+///---------------------- get category by name ---------------------
+//------------------------------------------------------------------
 export function getCategoryByName(req, res) {
   const name = req.params.name;
 
@@ -68,63 +74,53 @@ export function getCategoryByName(req, res) {
 //------------------------------------------------------------------
 export function updateCategoryByName(req, res) {
   const user = req.user;
-  if (user) {
-    if (user.type == "admin") {
-      const name = req.params.name;
-      Category.findOneAndUpdate({ name: name }, req.body, { new: true })
-        .then((updatedCategory) => {
-          if (updatedCategory) {
-            res.status(200).json({
-              message: "category updated successfully",
-            });
-          } else {
-            return res.status(404).json({
-              message: "Category Not Found",
-            });
-          }
-        })
-        .catch(() => {
-          res.status(400).json({
-            message: "Category updation failed",
+  if (verifyAdmin(user)) {
+    const name = req.params.name;
+    Category.findOneAndUpdate({ name: name }, req.body, { new: true })
+      .then((updatedCategory) => {
+        if (updatedCategory) {
+          res.status(200).json({
+            message: "category updated successfully",
           });
+        } else {
+          return res.status(404).json({
+            message: "Category Not Found",
+          });
+        }
+      })
+      .catch(() => {
+        res.status(400).json({
+          message: "Category updation failed",
         });
-    } else {
-      res.status(403).json({
-        message: "you do not have permission to update a category",
       });
-    }
   } else {
-    res.status(403).json({
-      message: "Please login to create a category",
+    res.status(400).json({
+      message: "Unauthorized",
     });
   }
 }
 
-// delete category ----------------
+//------------------------------------------------------------------
+///------------------------- delete category -----------------------
+//------------------------------------------------------------------
 export function deleteCategory(req, res) {
   const user = req.user;
-  if (user) {
-    if (user.type == "admin") {
-      const name = req.params.name;
-      Category.findOneAndDelete({ name: name })
-        .then(() => {
-          res.status(200).json({
-            message: "category deleted successfully",
-          });
-        })
-        .catch(() => {
-          res.status(400).json({
-            message: "Category deletion failed",
-          });
+  if (verifyAdmin(user)) {
+    const name = req.params.name;
+    Category.findOneAndDelete({ name: name })
+      .then(() => {
+        res.status(200).json({
+          message: "category deleted successfully",
         });
-    } else {
-      res.status(403).json({
-        message: "you do not have permission to delete a category",
+      })
+      .catch(() => {
+        res.status(400).json({
+          message: "Category deletion failed",
+        });
       });
-    }
   } else {
-    res.status(403).json({
-      message: "Please login to delete a category",
+    res.status(400).json({
+      message: "Unauthorized",
     });
   }
 }
