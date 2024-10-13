@@ -70,3 +70,28 @@ export function updateEventById(req, res) {
     });
   }
 }
+
+//------------------------------------------------------------------
+///---------------------- delete event by id -----------------------
+//------------------------------------------------------------------
+export function deleteEventById(req, res) {
+  const user = req.user;
+  if (verifyAdmin(user)) {
+    const eventId = req.params.eventId;
+    Event.findOneAndDelete({ eventId: eventId })
+      .then(() => {
+        res.status(200).json({
+          message: "Event deleted successfully",
+        });
+      })
+      .catch(() => {
+        res.status(400).json({
+          message: "Event deletion failed",
+        });
+      });
+  } else {
+    res.status(400).json({
+      message: "Unauthorized",
+    });
+  }
+}
