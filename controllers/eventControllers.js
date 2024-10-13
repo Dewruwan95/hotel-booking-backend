@@ -1,37 +1,36 @@
 import Event from "../models/event.js";
+import { verifyAdmin } from "../utils/userVerification.js";
 
-// create event -------------------
+//------------------------------------------------------------------
+///-------------------------- create event -------------------------
+//------------------------------------------------------------------
 export function createEvent(req, res) {
   const user = req.user;
-  if (!user) {
-    res.status(403).json({
-      message: "Please login to create an event",
-    });
-    return;
-  }
-  if (user.type != "admin") {
-    res.status(403).json({
-      message: "you do not have permission to create an event",
-    });
-    return;
-  }
-  const event = req.body;
-  const newEvent = new Event(event);
-  newEvent
-    .save()
-    .then(() => {
-      res.json({
-        message: "Event Created successfully",
+  if (verifyAdmin(user)) {
+    const event = req.body;
+    const newEvent = new Event(event);
+    newEvent
+      .save()
+      .then(() => {
+        res.json({
+          message: "Event Created successfully",
+        });
+      })
+      .catch(() => {
+        res.json({
+          message: "event created failed",
+        });
       });
-    })
-    .catch(() => {
-      res.json({
-        message: "event created failed",
-      });
+  } else {
+    res.status(400).json({
+      message: "Unauthorized",
     });
+  }
 }
 
-// get event ----------------------
+//------------------------------------------------------------------
+///--------------------------- get event ---------------------------
+//------------------------------------------------------------------
 export function getEvents(req, res) {
   Event.find()
     .then((events) => {
