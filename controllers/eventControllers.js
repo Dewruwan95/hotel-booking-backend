@@ -44,3 +44,29 @@ export function getEvents(req, res) {
       });
     });
 }
+
+//------------------------------------------------------------------
+///---------------------- update event by id -----------------------
+//------------------------------------------------------------------
+
+export function updateEventById(req, res) {
+  const user = req.user;
+  if (verifyAdmin(user)) {
+    const eventId = req.params.eventId;
+    Event.findOneAndUpdate({ eventId: eventId }, req.body, { new: true })
+      .then((updatedEvent) => {
+        res.status(200).json({
+          message: "Event updated successfully",
+        });
+      })
+      .catch(() => {
+        res.status(400).json({
+          message: "Event updation failed",
+        });
+      });
+  } else {
+    res.status(400).json({
+      message: "Unauthorized",
+    });
+  }
+}
