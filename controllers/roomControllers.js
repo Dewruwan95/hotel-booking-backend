@@ -1,4 +1,5 @@
 import Room from "../models/room.js";
+import { verifyAdmin } from "../utils/userVerification.js";
 
 //------------------------------------------------------------------
 ///--------------------------- create room -------------------------
@@ -6,31 +7,25 @@ import Room from "../models/room.js";
 export function createRoom(req, res) {
   const user = req.user;
 
-  if (user) {
-    if (user.type == "admin") {
-      const room = req.body;
-      const newRoom = new Room(room);
+  if (verifyAdmin(user)) {
+    const room = req.body;
+    const newRoom = new Room(room);
 
-      newRoom
-        .save()
-        .then(() => {
-          res.status(200).json({
-            message: "Room created successfully",
-          });
-        })
-        .catch(() => {
-          res.status(400).json({
-            message: "Room creation failed",
-          });
+    newRoom
+      .save()
+      .then(() => {
+        res.status(200).json({
+          message: "Room created successfully",
         });
-    } else {
-      res.status(403).json({
-        message: "You dont have permission to create a room",
+      })
+      .catch(() => {
+        res.status(400).json({
+          message: "Room creation failed",
+        });
       });
-    }
   } else {
     res.status(403).json({
-      message: "Please log in before create a room",
+      message: "Unauthorized",
     });
   }
 }
@@ -41,9 +36,15 @@ export function createRoom(req, res) {
 export function getRooms(req, res) {
   Room.find()
     .then((categories) => {
-      res.json({
-        list: categories,
-      });
+      if (categories) {
+        res.json({
+          list: categories,
+        });
+      } else {
+        res.status(400).json({
+          message: "Room not found",
+        });
+      }
     })
     .catch(() => {
       res.status(400).json({
@@ -83,30 +84,24 @@ export function getRoomByNumber(req, res) {
 export function updateRoomByNumber(req, res) {
   const user = req.user;
 
-  if (user) {
-    if (user.type == "admin") {
-      const number = req.params.number;
-      Room.updateOne({ roomNo: number }, req.body, { new: true }).then(
-        (result) => {
-          if (result) {
-            res.status(200).json({
-              room: result,
-            });
-          } else {
-            res.status(400).json({
-              message: "Room not found",
-            });
-          }
+  if (verifyAdmin(user)) {
+    const number = req.params.number;
+    Room.updateOne({ roomNo: number }, req.body, { new: true }).then(
+      (result) => {
+        if (result) {
+          res.status(200).json({
+            room: result,
+          });
+        } else {
+          res.status(400).json({
+            message: "Room not found",
+          });
         }
-      );
-    } else {
-      res.status(403).json({
-        message: "You dont have permission to create a room",
-      });
-    }
+      }
+    );
   } else {
     res.status(403).json({
-      message: "Please log in before create a room",
+      message: "Unauthorized",
     });
   }
 }
@@ -117,28 +112,22 @@ export function updateRoomByNumber(req, res) {
 
 export function deleteRoomByNumber(req, res) {
   const user = req.user;
-  if (user) {
-    if (user.type == "admin") {
-      const number = req.params.number;
-      Room.findOneAndDelete({ roomNo: number })
-        .then(() => {
-          res.status(200).json({
-            message: "Room deleted successfully",
-          });
-        })
-        .catch(() => {
-          res.status(400).json({
-            message: "Room deletion failed",
-          });
+  if (verifyAdmin(user)) {
+    const number = req.params.number;
+    Room.findOneAndDelete({ roomNo: number })
+      .then(() => {
+        res.status(200).json({
+          message: "Room deleted successfully",
         });
-    } else {
-      res.status(403).json({
-        message: "you do not have permission to delete a room",
+      })
+      .catch(() => {
+        res.status(400).json({
+          message: "Room deletion failed",
+        });
       });
-    }
   } else {
     res.status(403).json({
-      message: "Please login to delete a room",
+      message: "Unauthorized",
     });
   }
 }
