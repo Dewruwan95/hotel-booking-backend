@@ -6,7 +6,7 @@ import eventRouter from "./routes/eventRoute.js";
 import categoryRouter from "./routes/categoryRoute.js";
 import roomRouter from "./routes/roomRoute.js";
 import dotenv from "dotenv";
-import { verifyUser } from "./middlewares/userVerification.js";
+import { authenticateUser } from "./middlewares/userAuthentication.js";
 
 dotenv.config();
 const app = express();
@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 
 const connectionString = process.env.MONGODB_URL;
 
-app.use(verifyUser);
+app.use(authenticateUser);
 
 mongoose
   .connect(connectionString)
