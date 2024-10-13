@@ -46,6 +46,30 @@ export function getEvents(req, res) {
 }
 
 //------------------------------------------------------------------
+///------------------------ get event by id ------------------------
+//------------------------------------------------------------------
+export function getEventbyId(req, res) {
+  const eventId = req.params.eventId;
+  Event.findOne({ eventId: eventId })
+    .then((events) => {
+      if (events) {
+        res.status(200).json({
+          list: events,
+        });
+      } else {
+        res.status(400).json({
+          message: "Event not found",
+        });
+      }
+    })
+    .catch(() => {
+      res.status(400).json({
+        message: "Failed to get events",
+      });
+    });
+}
+
+//------------------------------------------------------------------
 ///---------------------- update event by id -----------------------
 //------------------------------------------------------------------
 
