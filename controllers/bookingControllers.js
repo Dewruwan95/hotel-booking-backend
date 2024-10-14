@@ -37,3 +37,32 @@ export function createBooking(req, res) {
     });
   }
 }
+
+//------------------------------------------------------------------
+///--------------------- get Bookings as admin ---------------------
+//------------------------------------------------------------------
+export function getBookingsAsAdmin(req, res) {
+  if (verifyAdmin(req)) {
+    Booking.find()
+      .then((bookings) => {
+        if (bookings) {
+          res.status(200).json({
+            list: bookings,
+          });
+        } else {
+          res.status(400).json({
+            message: "Bookings not found",
+          });
+        }
+      })
+      .catch(() => {
+        res.status(400).json({
+          message: "Failed to get bookings",
+        });
+      });
+  } else {
+    res.status(400).json({
+      message: "Unauthorized",
+    });
+  }
+}

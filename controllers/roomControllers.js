@@ -34,10 +34,10 @@ export function createRoom(req, res) {
 //------------------------------------------------------------------
 export function getRooms(req, res) {
   Room.find()
-    .then((categories) => {
-      if (categories) {
+    .then((rooms) => {
+      if (rooms) {
         res.json({
-          list: categories,
+          list: rooms,
         });
       } else {
         res.status(400).json({
