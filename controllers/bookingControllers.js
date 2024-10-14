@@ -39,7 +39,7 @@ export function createBooking(req, res) {
 }
 
 //------------------------------------------------------------------
-///--------------------- get Bookings as admin ---------------------
+///------------------------- get Bookings  -------------------------
 //------------------------------------------------------------------
 export function getBookings(req, res) {
   // if user is an admin
@@ -81,6 +81,56 @@ export function getBookings(req, res) {
           });
       }
     });
+  } else {
+    res.status(400).json({
+      message: "Unauthorized",
+    });
+  }
+}
+
+//------------------------------------------------------------------
+///---------------------- get Bookings by Id -----------------------
+//------------------------------------------------------------------
+export function getBookingsById(req, res) {
+  const bookingId = req.params.bookingId;
+  // if user is an admin
+  if (verifyAdmin(req)) {
+    Booking.findOne({ bookingId: bookingId })
+      .then((booking) => {
+        if (booking) {
+          res.status(200).json({
+            list: booking,
+          });
+        } else {
+          res.status(400).json({
+            message: "Booking not found",
+          });
+        }
+      })
+      .catch(() => {
+        res.status(400).json({
+          message: "Failed to get booking",
+        });
+      });
+    // if user is an customer
+  } else if (verifyCustomer(req)) {
+    Booking.findOne({ bookingId: bookingId, email: req.user.email })
+      .then((booking) => {
+        if (booking) {
+          res.status(200).json({
+            list: booking,
+          });
+        } else {
+          res.status(400).json({
+            message: "Booking not found",
+          });
+        }
+      })
+      .catch(() => {
+        res.status(400).json({
+          message: "Failed to get booking",
+        });
+      });
   } else {
     res.status(400).json({
       message: "Unauthorized",
