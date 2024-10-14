@@ -79,6 +79,31 @@ export function getRoomByNumber(req, res) {
 }
 
 //------------------------------------------------------------------
+///----------------------- get room by category ----------------------
+//------------------------------------------------------------------
+export function getRoomByCategory(req, res) {
+  const category = req.params.category;
+
+  Room.find({ category: category })
+    .then((result) => {
+      if (result) {
+        res.status(200).json({
+          room: result,
+        });
+      } else {
+        res.status(400).json({
+          message: "Room not found",
+        });
+      }
+    })
+    .catch(() => {
+      res.status(400).json({
+        message: "Failed to get Room",
+      });
+    });
+}
+
+//------------------------------------------------------------------
 ///---------------------- update room by number --------------------
 //------------------------------------------------------------------
 export function updateRoomByNumber(req, res) {
