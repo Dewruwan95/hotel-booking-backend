@@ -10,26 +10,30 @@ const roomSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  description: {
+  specialDescription: {
     type: String,
-    required: true,
+    default: "",
   },
-  maxGuest: {
+  maxGuests: {
     type: Number,
     required: true,
   },
-  photos: {
-    type: Object,
-    default: {},
-    required: true,
-  },
-  isDisabled: {
+  photos: [
+    {
+      type: String,
+    },
+  ],
+  availabe: {
     type: Boolean,
-    default: false,
+    default: true,
   },
-  isBooked: {
+  isActive: {
     type: Boolean,
-    default: false,
+    default: true,
+  },
+  notes: {
+    type: String,
+    default: "",
   },
 });
 
