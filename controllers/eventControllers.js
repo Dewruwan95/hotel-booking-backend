@@ -5,8 +5,7 @@ import { verifyAdmin } from "../utils/userVerification.js";
 ///-------------------------- create event -------------------------
 //------------------------------------------------------------------
 export function createEvent(req, res) {
-  const user = req.user;
-  if (verifyAdmin(user)) {
+  if (verifyAdmin(req)) {
     const event = req.body;
     const newEvent = new Event(event);
     newEvent
@@ -74,8 +73,7 @@ export function getEventbyId(req, res) {
 //------------------------------------------------------------------
 
 export function updateEventById(req, res) {
-  const user = req.user;
-  if (verifyAdmin(user)) {
+  if (verifyAdmin(req)) {
     const eventId = req.params.eventId;
     Event.findOneAndUpdate({ eventId: eventId }, req.body, { new: true })
       .then((updatedEvent) => {
@@ -99,8 +97,7 @@ export function updateEventById(req, res) {
 ///---------------------- delete event by id -----------------------
 //------------------------------------------------------------------
 export function deleteEventById(req, res) {
-  const user = req.user;
-  if (verifyAdmin(user)) {
+  if (verifyAdmin(req)) {
     const eventId = req.params.eventId;
     Event.findOneAndDelete({ eventId: eventId })
       .then(() => {

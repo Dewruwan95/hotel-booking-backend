@@ -5,7 +5,7 @@ import { verifyAdmin } from "../utils/userVerification.js";
 ///------------------------- create category -----------------------
 //------------------------------------------------------------------
 export function createCategory(req, res) {
-  if (verifyAdmin(req.user)) {
+  if (verifyAdmin(req)) {
     const category = req.body;
     const newCategory = new Category(category);
 
@@ -73,8 +73,7 @@ export function getCategoryByName(req, res) {
 ///--------------------- update category by name -------------------
 //------------------------------------------------------------------
 export function updateCategoryByName(req, res) {
-  const user = req.user;
-  if (verifyAdmin(user)) {
+  if (verifyAdmin(req)) {
     const name = req.params.name;
     Category.findOneAndUpdate({ name: name }, req.body, { new: true })
       .then((updatedCategory) => {
@@ -104,8 +103,7 @@ export function updateCategoryByName(req, res) {
 ///------------------------- delete category -----------------------
 //------------------------------------------------------------------
 export function deleteCategory(req, res) {
-  const user = req.user;
-  if (verifyAdmin(user)) {
+  if (verifyAdmin(req)) {
     const name = req.params.name;
     Category.findOneAndDelete({ name: name })
       .then(() => {

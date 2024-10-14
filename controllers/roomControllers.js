@@ -5,9 +5,7 @@ import { verifyAdmin } from "../utils/userVerification.js";
 ///--------------------------- create room -------------------------
 //------------------------------------------------------------------
 export function createRoom(req, res) {
-  const user = req.user;
-
-  if (verifyAdmin(user)) {
+  if (verifyAdmin(req)) {
     const room = req.body;
     const newRoom = new Room(room);
 
@@ -18,9 +16,10 @@ export function createRoom(req, res) {
           message: "Room created successfully",
         });
       })
-      .catch(() => {
+      .catch((err) => {
         res.status(400).json({
           message: "Room creation failed",
+          error: err,
         });
       });
   } else {
@@ -107,9 +106,7 @@ export function getRoomByCategory(req, res) {
 ///---------------------- update room by number --------------------
 //------------------------------------------------------------------
 export function updateRoomByNumber(req, res) {
-  const user = req.user;
-
-  if (verifyAdmin(user)) {
+  if (verifyAdmin(req)) {
     const number = req.params.number;
     Room.updateOne({ roomNo: number }, req.body, { new: true }).then(
       (result) => {
@@ -136,8 +133,7 @@ export function updateRoomByNumber(req, res) {
 //------------------------------------------------------------------
 
 export function deleteRoomByNumber(req, res) {
-  const user = req.user;
-  if (verifyAdmin(user)) {
+  if (verifyAdmin(req)) {
     const number = req.params.number;
     Room.findOneAndDelete({ roomNo: number })
       .then(() => {
