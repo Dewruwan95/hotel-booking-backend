@@ -2,13 +2,15 @@ import express from "express";
 import {
   createBooking,
   getBookings,
-  getBookingsById,
+  getBookingById,
+  updateBookingById,
 } from "../controllers/bookingControllers.js";
 
 const bookingRouter = express.Router();
 
 bookingRouter.post("/", createBooking);
 bookingRouter.get("/", getBookings);
-bookingRouter.get("/:bookingId", getBookingsById);
+bookingRouter.get("/:bookingId", getBookingById);
+bookingRouter.put("/:bookingId", updateBookingById);
 
 export default bookingRouter;

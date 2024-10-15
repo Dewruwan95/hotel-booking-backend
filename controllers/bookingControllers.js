@@ -91,7 +91,7 @@ export function getBookings(req, res) {
 //------------------------------------------------------------------
 ///---------------------- get Bookings by Id -----------------------
 //------------------------------------------------------------------
-export function getBookingsById(req, res) {
+export function getBookingById(req, res) {
   const bookingId = req.params.bookingId;
   // if user is an admin
   if (verifyAdmin(req)) {
@@ -129,6 +129,37 @@ export function getBookingsById(req, res) {
       .catch(() => {
         res.status(400).json({
           message: "Failed to get booking",
+        });
+      });
+  } else {
+    res.status(400).json({
+      message: "Unauthorized",
+    });
+  }
+}
+
+//------------------------------------------------------------------
+///-------------------- update Bookings by Id ----------------------
+//------------------------------------------------------------------
+export function updateBookingById(req, res) {
+  const bookingId = req.params.bookingId;
+  // if user is an admin
+  if (verifyAdmin(req)) {
+    Booking.findOneAndUpdate({ bookingId: bookingId }, req.body, { new: true })
+      .then((updatedBooking) => {
+        if (updatedBooking) {
+          res.status(200).json({
+            message: "Booking updated successfully",
+          });
+        } else {
+          res.status(400).json({
+            message: "Booking not found",
+          });
+        }
+      })
+      .catch(() => {
+        res.status(400).json({
+          message: "Booking updation failed",
         });
       });
   } else {
