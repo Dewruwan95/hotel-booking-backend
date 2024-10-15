@@ -107,6 +107,11 @@ export function loginUser(req, res) {
       res.json({
         message: "User not found",
       });
+      // check user banned or not
+    } else if (user.disabled) {
+      res.json({
+        message: "User already banned",
+      });
     } else {
       const saltingText = user.saltingText;
       const password = credentials.password + saltingText;
