@@ -63,3 +63,35 @@ export function getFeedback(req, res) {
     });
   }
 }
+
+//------------------------------------------------------------------
+///------------------------- update feedback -----------------------
+//------------------------------------------------------------------
+export function updateFeedback(req, res) {
+  if (verifyAdmin(req)) {
+    const feedback = req.body;
+    Feedback.findOneAndUpdate({ feedbackId: feedback.feedbackId }, feedback, {
+      new: true,
+    })
+      .then((updatedFeedback) => {
+        if (updatedFeedback) {
+          res.status(200).json({
+            message: "Feedback updated successfully",
+          });
+        } else {
+          res.status(400).json({
+            message: "Feedback not found",
+          });
+        }
+      })
+      .catch(() => {
+        res.status(400).json({
+          message: "Feedback updation failed",
+        });
+      });
+  } else {
+    res.status(400).json({
+      message: "Unauthorized",
+    });
+  }
+}
