@@ -1,5 +1,5 @@
 import Feedback from "../models/feedback.js";
-import { verifyCustomer } from "../utils/userVerification.js";
+import { verifyAdmin, verifyCustomer } from "../utils/userVerification.js";
 
 //------------------------------------------------------------------
 ///-------------------------- create feedback ----------------------
@@ -23,6 +23,43 @@ export function createFeedback(req, res) {
   } else {
     res.status(400).json({
       message: "Unauthorized",
+    });
+  }
+}
+
+//------------------------------------------------------------------
+///--------------------------- get feedback ------------------------
+//------------------------------------------------------------------
+export function getFeedback(req, res) {
+  if (verifyAdmin(req)) {
+    Feedback.find()
+      .then((feedbacks) => {
+        if (feedbacks) {
+          res.status(200).json({
+            list: feedbacks,
+          });
+        } else {
+          res.status(400).json({
+            message: "Feedbacks not found",
+          });
+        }
+      })
+      .catch(() => {
+        res.status(400).json({
+          message: "Failed to get feedbacks",
+        });
+      });
+  } else {
+    Feedback.find({ approved: true }).then((feedbacks) => {
+      if (feedbacks) {
+        res.status(200).json({
+          list: feedbacks,
+        });
+      } else {
+        res.status(400).json({
+          message: "Feedbacks not found",
+        });
+      }
     });
   }
 }
