@@ -2,13 +2,13 @@ import express from "express";
 import {
   createFeedback,
   getFeedback,
-  updateFeedback,
+  updateFeedbackById,
 } from "../controllers/feedbackController.js";
 
 const feedbackRouter = express.Router();
 
 feedbackRouter.post("/", createFeedback);
 feedbackRouter.get("/", getFeedback);
-feedbackRouter.put("/", updateFeedback);
+feedbackRouter.put("/:feedbackId", updateFeedbackById);
 
 export default feedbackRouter;

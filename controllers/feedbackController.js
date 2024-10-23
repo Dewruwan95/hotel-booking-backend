@@ -65,24 +65,19 @@ export function getFeedback(req, res) {
 }
 
 //------------------------------------------------------------------
-///------------------------- update feedback -----------------------
+///---------------------- update feedback by id---------------------
 //------------------------------------------------------------------
-export function updateFeedback(req, res) {
+export function updateFeedbackById(req, res) {
   if (verifyAdmin(req)) {
-    const feedback = req.body;
-    Feedback.findOneAndUpdate({ feedbackId: feedback.feedbackId }, feedback, {
+    const feedbackId = req.params.feedbackId;
+
+    Feedback.findOneAndUpdate({ feedbackId: feedbackId }, req.body, {
       new: true,
     })
       .then((updatedFeedback) => {
-        if (updatedFeedback) {
-          res.status(200).json({
-            message: "Feedback updated successfully",
-          });
-        } else {
-          res.status(400).json({
-            message: "Feedback not found",
-          });
-        }
+        res.status(200).json({
+          message: "Feedback updated successfully",
+        });
       })
       .catch(() => {
         res.status(400).json({
