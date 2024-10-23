@@ -90,3 +90,27 @@ export function updateFeedbackById(req, res) {
     });
   }
 }
+
+//------------------------------------------------------------------
+///------------------------- delete feedback -----------------------
+//------------------------------------------------------------------
+export function deleteFeedbackById(req, res) {
+  if (verifyAdmin(req)) {
+    const feedbackId = req.params.feedbackId;
+    Feedback.findOneAndDelete({ feedbackId: feedbackId })
+      .then(() => {
+        res.status(200).json({
+          message: "Feedback deleted successfully",
+        });
+      })
+      .catch(() => {
+        res.status(400).json({
+          message: "Feedback deletion failed",
+        });
+      });
+  } else {
+    res.status(400).json({
+      message: "Unauthorized",
+    });
+  }
+}
