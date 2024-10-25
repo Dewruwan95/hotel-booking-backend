@@ -9,9 +9,11 @@ import dotenv from "dotenv";
 import { authenticateUser } from "./middlewares/userAuthentication.js";
 import bookingRouter from "./routes/bookingRoute.js";
 import feedbackRouter from "./routes/feedbackRoute.js";
+import cors from "cors";
 
 dotenv.config();
 const app = express();
+app.use(cors());
 
 app.use(bodyParser.json());
 
