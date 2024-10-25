@@ -26,7 +26,7 @@ const feedbackSchema = mongoose.Schema({
     type: Number,
     required: true,
   },
-  date: {
+  timestamp: {
     type: Date,
     required: true,
     default: Date.now,
