@@ -2,7 +2,9 @@ import User from "../models/user.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
-// create user -------------------
+//------------------------------------------------------------------
+///--------------------------- create user -------------------------
+//------------------------------------------------------------------
 export function createUser(req, res) {
   const user = req.body;
 
@@ -31,8 +33,11 @@ export function createUser(req, res) {
       });
     });
 }
-// get users -------------------
-export function getUsers(req, res) {
+
+//------------------------------------------------------------------
+///-------------------------- get All users ------------------------
+//------------------------------------------------------------------
+export function getAllUsers(req, res) {
   User.find().then((users) => {
     res.json({
       list: users,
@@ -40,7 +45,26 @@ export function getUsers(req, res) {
   });
 }
 
-// salting charactor generation -------------------
+//------------------------------------------------------------------
+///------------------------- get single users ----------------------
+//------------------------------------------------------------------
+export function getUser(req, res) {
+  const user = req.body.user;
+  if (user) {
+    res.status(200).json({
+      message: "User Found",
+      user: user,
+    });
+  } else {
+    res.status(404).json({
+      message: "User Not Found",
+    });
+  }
+}
+
+//------------------------------------------------------------------
+///------------------- generate salting characters -----------------
+//------------------------------------------------------------------
 function generateSaltingText() {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -53,7 +77,9 @@ function generateSaltingText() {
   return result;
 }
 
-// update users -------------------
+//------------------------------------------------------------------
+///--------------------------- update user -------------------------
+//------------------------------------------------------------------
 export function updateUser(req, res) {
   User.findOneAndUpdate({ email: req.body.email }, req.body, { new: true })
     .then((updatedUser) => {
@@ -74,7 +100,9 @@ export function updateUser(req, res) {
     });
 }
 
-// delete users -------------------
+//------------------------------------------------------------------
+///---------------------------- delete user ------------------------
+//------------------------------------------------------------------
 export function deleteUser(req, res) {
   User.deleteOne({ email: req.body.email })
     .then((result) => {
@@ -96,7 +124,9 @@ export function deleteUser(req, res) {
     });
 }
 
-// login users -------------------
+//------------------------------------------------------------------
+///---------------------------- login user -------------------------
+//------------------------------------------------------------------
 export function loginUser(req, res) {
   const credentials = req.body;
 
@@ -132,7 +162,7 @@ export function loginUser(req, res) {
         res.json({
           message: "User found",
           user: user,
-          toket: token,
+          token: token,
         });
       } else {
         res.status(403).json({

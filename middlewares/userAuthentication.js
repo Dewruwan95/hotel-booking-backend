@@ -6,7 +6,7 @@ export function authenticateUser(req, res, next) {
   if (token) {
     jwt.verify(token, process.env.HASHING_KEY, (err, decoded) => {
       if (decoded != null) {
-        req.user = decoded;
+        req.body.user = decoded;
         next();
       } else {
         next();
