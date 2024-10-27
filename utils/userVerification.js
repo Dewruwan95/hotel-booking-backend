@@ -1,5 +1,6 @@
 export function verifyAdmin(req) {
-  const user = req.user;
+  const user = req.body.user;
+
   if (user) {
     if (user.type == "admin") {
       return true;
@@ -12,7 +13,7 @@ export function verifyAdmin(req) {
 }
 
 export function verifyCustomer(req) {
-  const user = req.user;
+  const user = req.body.user;
   if (user) {
     if (user.type == "customer") {
       return true;

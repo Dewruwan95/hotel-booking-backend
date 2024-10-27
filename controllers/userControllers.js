@@ -153,6 +153,9 @@ export function loginUser(req, res) {
           firstName: user.firstName,
           lastName: user.lastName,
           type: user.type,
+          phone: user.phone,
+          whatsApp: user.whatsApp,
+          image: user.image,
         };
 
         // sign in with payload and secret key

@@ -36,7 +36,7 @@ const userSchema = mongoose.Schema({
   },
   image: {
     type: String,
-    default: "https://cdn-icons-png.flaticon.com/512/9187/9187604.png",
+    default: "user.jpg",
   },
   disabled: {
     type: Boolean,

@@ -35,7 +35,7 @@ export function getCategory(req, res) {
   Category.find()
     .then((categories) => {
       res.json({
-        list: categories,
+        categories: categories,
       });
     })
     .catch(() => {
@@ -102,7 +102,7 @@ export function updateCategoryByName(req, res) {
 //------------------------------------------------------------------
 ///------------------------- delete category -----------------------
 //------------------------------------------------------------------
-export function deleteCategory(req, res) {
+export function deleteCategoryByName(req, res) {
   if (verifyAdmin(req)) {
     const name = req.params.name;
     Category.findOneAndDelete({ name: name })
