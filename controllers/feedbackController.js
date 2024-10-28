@@ -4,22 +4,22 @@ import { verifyAdmin, verifyCustomer } from "../utils/userVerification.js";
 //------------------------------------------------------------------
 ///-------------------------- create feedback ----------------------
 //------------------------------------------------------------------
-export function createFeedback(req, res) {
+export async function createFeedback(req, res) {
   if (verifyCustomer(req)) {
     const feedback = req.body;
     const newFeedback = new Feedback(feedback);
-    newFeedback
-      .save()
-      .then(() => {
-        res.status(200).json({
-          message: "Feedback created successfully",
-        });
-      })
-      .catch(() => {
-        res.status(400).json({
-          message: "Feedback creation failed",
-        });
+
+    try {
+      await newFeedback.save();
+      res.status(200).json({
+        message: "Feedback created successfully",
       });
+    } catch (err) {
+      res.status(400).json({
+        message: "Feedback creation failed",
+        error: err,
+      });
+    }
   } else {
     res.status(400).json({
       message: "Unauthorized",
@@ -30,36 +30,29 @@ export function createFeedback(req, res) {
 //------------------------------------------------------------------
 ///--------------------------- get feedback ------------------------
 //------------------------------------------------------------------
-export function getFeedback(req, res) {
-  if (verifyAdmin(req)) {
-    Feedback.find()
-      .then((feedbacks) => {
-        if (feedbacks) {
-          res.status(200).json({
-            list: feedbacks,
-          });
-        } else {
-          res.status(400).json({
-            message: "Feedbacks not found",
-          });
-        }
-      })
-      .catch(() => {
-        res.status(400).json({
-          message: "Failed to get feedbacks",
-        });
+export async function getFeedback(req, res) {
+  try {
+    let feedbacks;
+
+    if (verifyAdmin(req)) {
+      feedbacks = await Feedback.find();
+    } else {
+      feedbacks = await Feedback.find({ approved: true });
+    }
+
+    if (feedbacks.length > 0) {
+      res.status(200).json({
+        list: feedbacks,
       });
-  } else {
-    Feedback.find({ approved: true }).then((feedbacks) => {
-      if (feedbacks) {
-        res.status(200).json({
-          list: feedbacks,
-        });
-      } else {
-        res.status(400).json({
-          message: "Feedbacks not found",
-        });
-      }
+    } else {
+      res.status(404).json({
+        message: "Feedbacks not found",
+      });
+    }
+  } catch (err) {
+    res.status(400).json({
+      message: "Failed to get feedbacks",
+      error: err,
     });
   }
 }
@@ -67,23 +60,32 @@ export function getFeedback(req, res) {
 //------------------------------------------------------------------
 ///---------------------- update feedback by id---------------------
 //------------------------------------------------------------------
-export function updateFeedbackById(req, res) {
+export async function updateFeedbackById(req, res) {
   if (verifyAdmin(req)) {
     const feedbackId = req.params.feedbackId;
 
-    Feedback.findOneAndUpdate({ feedbackId: feedbackId }, req.body, {
-      new: true,
-    })
-      .then((updatedFeedback) => {
+    try {
+      const updatedFeedback = await Feedback.findOneAndUpdate(
+        { feedbackId: feedbackId },
+        req.body,
+        { new: true }
+      );
+
+      if (updatedFeedback) {
         res.status(200).json({
           message: "Feedback updated successfully",
         });
-      })
-      .catch(() => {
-        res.status(400).json({
-          message: "Feedback updation failed",
+      } else {
+        res.status(404).json({
+          message: "Feedback not found",
         });
+      }
+    } catch (err) {
+      res.status(400).json({
+        message: "Feedback updation failed",
+        error: err,
       });
+    }
   } else {
     res.status(400).json({
       message: "Unauthorized",
@@ -94,20 +96,30 @@ export function updateFeedbackById(req, res) {
 //------------------------------------------------------------------
 ///------------------------- delete feedback -----------------------
 //------------------------------------------------------------------
-export function deleteFeedbackById(req, res) {
+export async function deleteFeedbackById(req, res) {
   if (verifyAdmin(req)) {
     const feedbackId = req.params.feedbackId;
-    Feedback.findOneAndDelete({ feedbackId: feedbackId })
-      .then(() => {
+
+    try {
+      const deletedFeedback = await Feedback.findOneAndDelete({
+        feedbackId: feedbackId,
+      });
+
+      if (deletedFeedback) {
         res.status(200).json({
           message: "Feedback deleted successfully",
         });
-      })
-      .catch(() => {
-        res.status(400).json({
-          message: "Feedback deletion failed",
+      } else {
+        res.status(404).json({
+          message: "Feedback not found",
         });
+      }
+    } catch (err) {
+      res.status(400).json({
+        message: "Feedback deletion failed",
+        error: err,
       });
+    }
   } else {
     res.status(400).json({
       message: "Unauthorized",
