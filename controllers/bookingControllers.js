@@ -57,7 +57,7 @@ export async function getBookings(req, res) {
 
     if (bookings && bookings.length > 0) {
       res.status(200).json({
-        list: bookings,
+        bookings: bookings,
       });
     } else {
       res.status(400).json({

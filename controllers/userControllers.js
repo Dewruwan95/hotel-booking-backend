@@ -1,6 +1,7 @@
 import User from "../models/user.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { verifyAdmin } from "../utils/userVerification.js";
 
 //------------------------------------------------------------------
 ///--------------------------- create user -------------------------
@@ -36,14 +37,20 @@ export async function createUser(req, res) {
 ///-------------------------- get All users ------------------------
 //------------------------------------------------------------------
 export async function getAllUsers(req, res) {
-  try {
-    const users = await User.find();
-    res.json({
-      list: users,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Failed to retrieve users",
+  if (verifyAdmin(req)) {
+    try {
+      const users = await User.find();
+      res.json({
+        users: users,
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "Failed to retrieve users",
+      });
+    }
+  } else {
+    res.status(403).json({
+      message: "Unauthorized",
     });
   }
 }
@@ -147,6 +154,8 @@ export async function loginUser(req, res) {
   try {
     const user = await User.findOne({ email: credentials.email });
 
+    console.log(user);
+
     if (!user) {
       return res.json({
         message: "User not found",
@@ -189,6 +198,7 @@ export async function loginUser(req, res) {
   } catch (error) {
     res.status(500).json({
       message: "Login failed",
+      error: error,
     });
   }
 }

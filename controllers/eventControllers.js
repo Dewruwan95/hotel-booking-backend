@@ -34,7 +34,7 @@ export async function getEvents(req, res) {
   try {
     const events = await Event.find();
     res.status(200).json({
-      list: events,
+      events: events,
     });
   } catch (err) {
     res.status(400).json({

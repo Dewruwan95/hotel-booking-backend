@@ -42,7 +42,7 @@ export async function getFeedback(req, res) {
 
     if (feedbacks.length > 0) {
       res.status(200).json({
-        list: feedbacks,
+        feedbacks: feedbacks,
       });
     } else {
       res.status(404).json({
