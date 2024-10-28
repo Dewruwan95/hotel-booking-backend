@@ -2,7 +2,7 @@ import express from "express";
 import {
   createEvent,
   deleteEventById,
-  getEventbyId,
+  getEventById,
   getEvents,
   updateEventById,
 } from "../controllers/eventControllers.js";
@@ -11,7 +11,7 @@ const eventRouter = express.Router();
 
 eventRouter.post("/", createEvent);
 eventRouter.get("/", getEvents);
-eventRouter.get("/:eventId", getEventbyId);
+eventRouter.get("/:eventId", getEventById);
 eventRouter.put("/:eventId", updateEventById);
 eventRouter.delete("/:eventId", deleteEventById);
 
