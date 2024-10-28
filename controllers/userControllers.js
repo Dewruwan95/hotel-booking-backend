@@ -124,23 +124,30 @@ export async function updateUser(req, res) {
 //------------------------------------------------------------------
 ///---------------------------- delete user ------------------------
 //------------------------------------------------------------------
-export async function deleteUser(req, res) {
-  try {
-    const result = await User.deleteOne({ email: req.body.email });
+export async function deleteUserByEmail(req, res) {
+  if (verifyAdmin(req)) {
+    const email = req.params.email;
+    try {
+      const result = await User.deleteOne({ email: email });
 
-    if (result.deletedCount === 0) {
-      res.status(404).json({
-        message: "User Not Found",
-      });
-    } else {
-      res.status(200).json({
-        message: "User Deleted Successfully",
-        result,
+      if (result.deletedCount === 0) {
+        res.status(404).json({
+          message: "User Not Found",
+        });
+      } else {
+        res.status(200).json({
+          message: "User Deleted Successfully",
+          result,
+        });
+      }
+    } catch (error) {
+      res.status(400).json({
+        message: "User Deletion Failed",
       });
     }
-  } catch (error) {
-    res.status(400).json({
-      message: "User Deletion Failed",
+  } else {
+    res.status(403).json({
+      message: "Unauthorized",
     });
   }
 }
