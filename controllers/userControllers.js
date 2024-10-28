@@ -5,10 +5,10 @@ import bcrypt from "bcrypt";
 //------------------------------------------------------------------
 ///--------------------------- create user -------------------------
 //------------------------------------------------------------------
-export function createUser(req, res) {
+export async function createUser(req, res) {
   const user = req.body;
 
-  // salting & hashing user password
+  // Salting & hashing user password
   const password = user.password;
   const saltingText = generateSaltingText();
   const saltedPassword = password + saltingText;
@@ -20,44 +20,54 @@ export function createUser(req, res) {
 
   const newUser = new User(user);
 
-  newUser
-    .save()
-    .then(() => {
-      res.status(201).json({
-        message: "user Created Successfully",
-      });
-    })
-    .catch(() => {
-      res.status(409).json({
-        message: "User Created Failed",
-      });
+  try {
+    await newUser.save();
+    res.status(201).json({
+      message: "User Created Successfully",
     });
+  } catch (error) {
+    res.status(409).json({
+      message: "User Creation Failed",
+    });
+  }
 }
 
 //------------------------------------------------------------------
 ///-------------------------- get All users ------------------------
 //------------------------------------------------------------------
-export function getAllUsers(req, res) {
-  User.find().then((users) => {
+export async function getAllUsers(req, res) {
+  try {
+    const users = await User.find();
     res.json({
       list: users,
     });
-  });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to retrieve users",
+    });
+  }
 }
 
 //------------------------------------------------------------------
 ///------------------------- get single users ----------------------
 //------------------------------------------------------------------
-export function getUser(req, res) {
+export async function getUser(req, res) {
   const user = req.body.user;
-  if (user) {
-    res.status(200).json({
-      message: "User Found",
-      user: user,
-    });
-  } else {
-    res.status(404).json({
-      message: "User Not Found",
+
+  try {
+    if (user) {
+      res.status(200).json({
+        message: "User Found",
+        user: user,
+      });
+    } else {
+      res.status(404).json({
+        message: "User Not Found",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: "Error retrieving user",
     });
   }
 }
@@ -80,66 +90,69 @@ function generateSaltingText() {
 //------------------------------------------------------------------
 ///--------------------------- update user -------------------------
 //------------------------------------------------------------------
-export function updateUser(req, res) {
-  User.findOneAndUpdate({ email: req.body.email }, req.body, { new: true })
-    .then((updatedUser) => {
-      if (!updatedUser) {
-        return res.status(404).json({
-          message: "User Not Found",
-        });
-      } else {
-        res.status(200).json({
-          message: "User Updated Successfully",
-        });
-      }
-    })
-    .catch(() => {
-      res.status(400).json({
-        message: "User Updation Failed",
+export async function updateUser(req, res) {
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      { email: req.body.email },
+      req.body,
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        message: "User Not Found",
       });
+    } else {
+      res.status(200).json({
+        message: "User Updated Successfully",
+      });
+    }
+  } catch (error) {
+    res.status(400).json({
+      message: "User Updation Failed",
     });
+  }
 }
 
 //------------------------------------------------------------------
 ///---------------------------- delete user ------------------------
 //------------------------------------------------------------------
-export function deleteUser(req, res) {
-  User.deleteOne({ email: req.body.email })
-    .then((result) => {
-      if (result.deletedCount === 0) {
-        res.status(404).json({
-          message: "User Not Found",
-        });
-      } else {
-        res.status(200).json({
-          message: "User Deleted Successfully",
-          result,
-        });
-      }
-    })
-    .catch(() => {
-      res.status(400).json({
-        message: "User Deletion Failed",
+export async function deleteUser(req, res) {
+  try {
+    const result = await User.deleteOne({ email: req.body.email });
+
+    if (result.deletedCount === 0) {
+      res.status(404).json({
+        message: "User Not Found",
       });
+    } else {
+      res.status(200).json({
+        message: "User Deleted Successfully",
+        result,
+      });
+    }
+  } catch (error) {
+    res.status(400).json({
+      message: "User Deletion Failed",
     });
+  }
 }
 
 //------------------------------------------------------------------
 ///---------------------------- login user -------------------------
 //------------------------------------------------------------------
-export function loginUser(req, res) {
+export async function loginUser(req, res) {
   const credentials = req.body;
 
-  User.findOne({
-    email: credentials.email,
-  }).then((user) => {
+  try {
+    const user = await User.findOne({ email: credentials.email });
+
     if (!user) {
-      res.json({
+      return res.json({
         message: "User not found",
       });
-      // check user banned or not
     } else if (user.disabled) {
-      res.json({
+      return res.json({
         message: "User already banned",
       });
     } else {
@@ -158,20 +171,24 @@ export function loginUser(req, res) {
           image: user.image,
         };
 
-        // sign in with payload and secret key
+        // Sign in with payload and secret key
         const token = jwt.sign(payload, process.env.HASHING_KEY, {
           expiresIn: "48h",
         });
-        res.json({
+        return res.json({
           message: "User found",
           user: user,
           token: token,
         });
       } else {
-        res.status(403).json({
+        return res.status(403).json({
           message: "Incorrect Password",
         });
       }
     }
-  });
+  } catch (error) {
+    res.status(500).json({
+      message: "Login failed",
+    });
+  }
 }
