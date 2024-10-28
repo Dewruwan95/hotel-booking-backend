@@ -4,24 +4,22 @@ import { verifyAdmin } from "../utils/userVerification.js";
 //------------------------------------------------------------------
 ///--------------------------- create room -------------------------
 //------------------------------------------------------------------
-export function createRoom(req, res) {
+export async function createRoom(req, res) {
   if (verifyAdmin(req)) {
     const room = req.body;
     const newRoom = new Room(room);
 
-    newRoom
-      .save()
-      .then(() => {
-        res.status(200).json({
-          message: "Room created successfully",
-        });
-      })
-      .catch((err) => {
-        res.status(400).json({
-          message: "Room creation failed",
-          error: err,
-        });
+    try {
+      await newRoom.save();
+      res.status(200).json({
+        message: "Room created successfully",
       });
+    } catch (err) {
+      res.status(400).json({
+        message: "Room creation failed",
+        error: err,
+      });
+    }
   } else {
     res.status(403).json({
       message: "Unauthorized",
@@ -32,60 +30,86 @@ export function createRoom(req, res) {
 //------------------------------------------------------------------
 ///---------------------------- get rooms --------------------------
 //------------------------------------------------------------------
-export function getRooms(req, res) {
-  Room.find()
-    .then((rooms) => {
-      if (rooms) {
-        res.json({
-          list: rooms,
-        });
-      } else {
-        res.status(400).json({
-          message: "Room not found",
-        });
-      }
-    })
-    .catch(() => {
-      res.status(400).json({
-        message: "Failed to get room",
+export async function getRooms(req, res) {
+  try {
+    const rooms = await Room.find();
+
+    if (rooms) {
+      res.json({
+        rooms: rooms,
       });
+    } else {
+      res.status(400).json({
+        message: "Room not found",
+      });
+    }
+  } catch (error) {
+    res.status(400).json({
+      message: "Failed to get room",
     });
+  }
 }
 
 //------------------------------------------------------------------
 ///----------------------- get room by number ----------------------
 //------------------------------------------------------------------
-export function getRoomByNumber(req, res) {
+export async function getRoomByNumber(req, res) {
   const number = req.params.number;
 
-  Room.findOne({ roomNo: number })
-    .then((result) => {
-      if (result) {
-        res.status(200).json({
-          room: result,
-        });
-      } else {
-        res.status(400).json({
-          message: "Room not found",
-        });
-      }
-    })
-    .catch(() => {
-      res.status(400).json({
-        message: "Failed to get Room",
+  try {
+    const result = await Room.findOne({ roomNo: number });
+    if (result) {
+      res.status(200).json({
+        room: result,
       });
+    } else {
+      res.status(400).json({
+        message: "Room not found",
+      });
+    }
+  } catch (error) {
+    res.status(400).json({
+      message: "Failed to get Room",
     });
+  }
 }
 
 //------------------------------------------------------------------
 ///----------------------- get room by category ----------------------
 //------------------------------------------------------------------
-export function getRoomByCategory(req, res) {
+export async function getRoomByCategory(req, res) {
   const category = req.params.category;
 
-  Room.find({ category: category })
-    .then((result) => {
-      if (result) {
+  try {
+    const result = await Room.find({ category: category });
+    if (result.length > 0) {
+      res.status(200).json({
+        room: result,
+      });
+    } else {
+      res.status(400).json({
+        message: "Room not found",
+      });
+    }
+  } catch (error) {
+    res.status(400).json({
+      message: "Failed to get Room",
+    });
+  }
+}
+
+//------------------------------------------------------------------
+///---------------------- update room by number --------------------
+//------------------------------------------------------------------
+export async function updateRoomByNumber(req, res) {
+  if (verifyAdmin(req)) {
+    const number = req.params.number;
+
+    try {
+      const result = await Room.updateOne({ roomNo: number }, req.body, {
+        new: true,
+      });
+      if (result.matchedCount > 0) {
         res.status(200).json({
           room: result,
         });
@@ -94,33 +118,12 @@ export function getRoomByCategory(req, res) {
           message: "Room not found",
         });
       }
-    })
-    .catch(() => {
+    } catch (error) {
       res.status(400).json({
-        message: "Failed to get Room",
+        message: "Failed to update room",
+        error: error.message,
       });
-    });
-}
-
-//------------------------------------------------------------------
-///---------------------- update room by number --------------------
-//------------------------------------------------------------------
-export function updateRoomByNumber(req, res) {
-  if (verifyAdmin(req)) {
-    const number = req.params.number;
-    Room.updateOne({ roomNo: number }, req.body, { new: true }).then(
-      (result) => {
-        if (result) {
-          res.status(200).json({
-            room: result,
-          });
-        } else {
-          res.status(400).json({
-            message: "Room not found",
-          });
-        }
-      }
-    );
+    }
   } else {
     res.status(403).json({
       message: "Unauthorized",
@@ -131,21 +134,27 @@ export function updateRoomByNumber(req, res) {
 //------------------------------------------------------------------
 ///---------------------- delete room by number --------------------
 //------------------------------------------------------------------
-
-export function deleteRoomByNumber(req, res) {
+export async function deleteRoomByNumber(req, res) {
   if (verifyAdmin(req)) {
     const number = req.params.number;
-    Room.findOneAndDelete({ roomNo: number })
-      .then(() => {
+
+    try {
+      const result = await Room.findOneAndDelete({ roomNo: number });
+      if (result) {
         res.status(200).json({
           message: "Room deleted successfully",
         });
-      })
-      .catch(() => {
+      } else {
         res.status(400).json({
-          message: "Room deletion failed",
+          message: "Room not found",
         });
+      }
+    } catch (error) {
+      res.status(400).json({
+        message: "Room deletion failed",
+        error: error.message,
       });
+    }
   } else {
     res.status(403).json({
       message: "Unauthorized",
