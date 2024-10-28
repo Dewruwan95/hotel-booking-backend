@@ -4,33 +4,30 @@ import { verifyAdmin, verifyCustomer } from "../utils/userVerification.js";
 //------------------------------------------------------------------
 ///------------------------- create Booking ------------------------
 //------------------------------------------------------------------
-export function createBooking(req, res) {
+export async function createBooking(req, res) {
   if (verifyCustomer(req)) {
     const booking = req.body;
     const startingId = 1362;
 
-    Booking.countDocuments().then((count) => {
+    try {
+      const count = await Booking.countDocuments();
       const bookingId = startingId + count;
 
       booking.bookingId = bookingId;
       booking.email = req.user.email;
 
       const newBooking = new Booking(booking);
+      await newBooking.save();
 
-      newBooking
-        .save()
-        .then(() => {
-          res.status(200).json({
-            message: "Booking creation successful",
-          });
-        })
-        .catch((err) => {
-          res.status(400).json({
-            message: "Booking creation failed",
-            error: err,
-          });
-        });
-    });
+      res.status(200).json({
+        message: "Booking creation successful",
+      });
+    } catch (err) {
+      res.status(400).json({
+        message: "Booking creation failed",
+        error: err,
+      });
+    }
   } else {
     res.status(400).json({
       message: "Unauthorized",
@@ -41,49 +38,36 @@ export function createBooking(req, res) {
 //------------------------------------------------------------------
 ///------------------------- get Bookings  -------------------------
 //------------------------------------------------------------------
-export function getBookings(req, res) {
-  // if user is an admin
-  if (verifyAdmin(req)) {
-    Booking.find()
-      .then((bookings) => {
-        if (bookings) {
-          res.status(200).json({
-            list: bookings,
-          });
-        } else {
-          res.status(400).json({
-            message: "Bookings not found",
-          });
-        }
-      })
-      .catch(() => {
-        res.status(400).json({
-          message: "Failed to get bookings",
-        });
+export async function getBookings(req, res) {
+  try {
+    let bookings;
+
+    // if user is an admin
+    if (verifyAdmin(req)) {
+      bookings = await Booking.find();
+    }
+    // if user is a customer
+    else if (verifyCustomer(req)) {
+      bookings = await Booking.find({ email: req.user.email });
+    } else {
+      return res.status(400).json({
+        message: "Unauthorized",
       });
-    // if user is an customer
-  } else if (verifyCustomer(req)) {
-    Booking.find({ email: req.user.email }).then((bookings) => {
-      if (bookings) {
-        res.status(200).json({
-          list: bookings,
-        });
-      } else {
-        res
-          .status(400)
-          .json({
-            message: "Bookings not found",
-          })
-          .catch((err) => {
-            res.status(400).json({
-              message: "Failed to get bookings",
-            });
-          });
-      }
-    });
-  } else {
+    }
+
+    if (bookings && bookings.length > 0) {
+      res.status(200).json({
+        list: bookings,
+      });
+    } else {
+      res.status(400).json({
+        message: "Bookings not found",
+      });
+    }
+  } catch (err) {
     res.status(400).json({
-      message: "Unauthorized",
+      message: "Failed to get bookings",
+      error: err,
     });
   }
 }
@@ -91,49 +75,41 @@ export function getBookings(req, res) {
 //------------------------------------------------------------------
 ///---------------------- get Bookings by Id -----------------------
 //------------------------------------------------------------------
-export function getBookingById(req, res) {
+export async function getBookingById(req, res) {
   const bookingId = req.params.bookingId;
-  // if user is an admin
-  if (verifyAdmin(req)) {
-    Booking.findOne({ bookingId: bookingId })
-      .then((booking) => {
-        if (booking) {
-          res.status(200).json({
-            list: booking,
-          });
-        } else {
-          res.status(400).json({
-            message: "Booking not found",
-          });
-        }
-      })
-      .catch(() => {
-        res.status(400).json({
-          message: "Failed to get booking",
-        });
+
+  try {
+    let booking;
+
+    // if user is an admin
+    if (verifyAdmin(req)) {
+      booking = await Booking.findOne({ bookingId: bookingId });
+    }
+    // if user is a customer
+    else if (verifyCustomer(req)) {
+      booking = await Booking.findOne({
+        bookingId: bookingId,
+        email: req.user.email,
       });
-    // if user is an customer
-  } else if (verifyCustomer(req)) {
-    Booking.findOne({ bookingId: bookingId, email: req.user.email })
-      .then((booking) => {
-        if (booking) {
-          res.status(200).json({
-            list: booking,
-          });
-        } else {
-          res.status(400).json({
-            message: "Booking not found",
-          });
-        }
-      })
-      .catch(() => {
-        res.status(400).json({
-          message: "Failed to get booking",
-        });
+    } else {
+      return res.status(400).json({
+        message: "Unauthorized",
       });
-  } else {
+    }
+
+    if (booking) {
+      res.status(200).json({
+        list: booking,
+      });
+    } else {
+      res.status(400).json({
+        message: "Booking not found",
+      });
+    }
+  } catch (err) {
     res.status(400).json({
-      message: "Unauthorized",
+      message: "Failed to get booking",
+      error: err,
     });
   }
 }
@@ -141,27 +117,32 @@ export function getBookingById(req, res) {
 //------------------------------------------------------------------
 ///-------------------- update Bookings by Id ----------------------
 //------------------------------------------------------------------
-export function updateBookingById(req, res) {
+export async function updateBookingById(req, res) {
   const bookingId = req.params.bookingId;
-  // if user is an admin
+
   if (verifyAdmin(req)) {
-    Booking.findOneAndUpdate({ bookingId: bookingId }, req.body, { new: true })
-      .then((updatedBooking) => {
-        if (updatedBooking) {
-          res.status(200).json({
-            message: "Booking updated successfully",
-          });
-        } else {
-          res.status(400).json({
-            message: "Booking not found",
-          });
-        }
-      })
-      .catch(() => {
-        res.status(400).json({
-          message: "Booking updation failed",
+    try {
+      const updatedBooking = await Booking.findOneAndUpdate(
+        { bookingId: bookingId },
+        req.body,
+        { new: true }
+      );
+
+      if (updatedBooking) {
+        res.status(200).json({
+          message: "Booking updated successfully",
         });
+      } else {
+        res.status(400).json({
+          message: "Booking not found",
+        });
+      }
+    } catch (err) {
+      res.status(400).json({
+        message: "Booking updation failed",
+        error: err,
       });
+    }
   } else {
     res.status(400).json({
       message: "Unauthorized",
