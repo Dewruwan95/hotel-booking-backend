@@ -35,12 +35,21 @@ export async function getFeedback(req, res) {
     let feedbacks;
 
     if (verifyAdmin(req)) {
+      // Admin can see all verified and unverified reviews
       feedbacks = await Feedback.find();
+    } else if (verifyCustomer(req)) {
+      feedbacks = await Feedback.find({
+        $or: [
+          { approved: true }, // All verified reviews
+          { approved: false, email: req.body.user.email }, // Unverified reviews created by the user
+        ],
+      });
     } else {
+      // If the user is not a registered customer, show only verified reviews
       feedbacks = await Feedback.find({ approved: true });
     }
 
-    if (feedbacks.length > 0) {
+    if (feedbacks && feedbacks.length > 0) {
       res.status(200).json({
         feedbacks: feedbacks,
       });
