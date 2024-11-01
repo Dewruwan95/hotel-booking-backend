@@ -54,7 +54,7 @@ export async function getEventById(req, res) {
     const event = await Event.findOne({ eventId: eventId });
     if (event) {
       res.status(200).json({
-        list: event,
+        event: event,
       });
     } else {
       res.status(404).json({

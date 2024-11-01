@@ -35,7 +35,7 @@ app.use("/api/events", eventRouter);
 app.use("/api/categories", categoryRouter);
 app.use("/api/rooms", roomRouter);
 app.use("/api/bookings", bookingRouter);
-app.use("/api/feefbacks", feedbackRouter);
+app.use("/api/feedbacks", feedbackRouter);
 
 app.listen(5000, (req, res) => {
   console.log("Server is running on port 5000");
