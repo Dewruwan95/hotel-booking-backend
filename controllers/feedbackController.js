@@ -49,15 +49,9 @@ export async function getFeedback(req, res) {
       feedbacks = await Feedback.find({ approved: true });
     }
 
-    if (feedbacks && feedbacks.length > 0) {
-      res.status(200).json({
-        feedbacks: feedbacks,
-      });
-    } else {
-      res.status(404).json({
-        message: "Feedbacks not found",
-      });
-    }
+    res.status(200).json({
+      feedbacks: feedbacks,
+    });
   } catch (err) {
     res.status(400).json({
       message: "Failed to get feedbacks",

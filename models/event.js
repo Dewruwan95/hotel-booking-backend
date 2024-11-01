@@ -13,8 +13,7 @@ const eventSchema = mongoose.Schema({
   image: {
     type: String,
     required: true,
-    default:
-      "https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png",
+    default: "image-placeholder.png",
   },
   description: {
     type: String,
