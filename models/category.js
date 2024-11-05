@@ -21,6 +21,7 @@ const categorySchema = mongoose.Schema({
   },
   image: {
     type: String,
+    default: "image-placeholder.png",
   },
 });
 
