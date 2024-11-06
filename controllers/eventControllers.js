@@ -78,7 +78,7 @@ export async function updateEventById(req, res) {
 
     try {
       const updatedEvent = await Event.findOneAndUpdate(
-        { eventId: eventId },
+        { _id: eventId },
         req.body,
         { new: true }
       );
