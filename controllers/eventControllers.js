@@ -51,7 +51,7 @@ export async function getEventById(req, res) {
   const eventId = req.params.eventId;
 
   try {
-    const event = await Event.findOne({ eventId: eventId });
+    const event = await Event.findOne({ _id: eventId });
     if (event) {
       res.status(200).json({
         event: event,
@@ -113,7 +113,7 @@ export async function deleteEventById(req, res) {
     const eventId = req.params.eventId;
 
     try {
-      const deletedEvent = await Event.findOneAndDelete({ eventId: eventId });
+      const deletedEvent = await Event.findOneAndDelete({ _id: eventId });
       if (deletedEvent) {
         res.status(200).json({
           message: "Event deleted successfully",

@@ -36,7 +36,6 @@ const userSchema = mongoose.Schema({
   },
   image: {
     type: String,
-    default: "user.jpg",
   },
   disabled: {
     type: Boolean,

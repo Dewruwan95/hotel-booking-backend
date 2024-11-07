@@ -69,7 +69,7 @@ export async function updateFeedbackById(req, res) {
 
     try {
       const updatedFeedback = await Feedback.findOneAndUpdate(
-        { feedbackId: feedbackId },
+        { _id: feedbackId },
         req.body,
         { new: true }
       );
@@ -105,7 +105,7 @@ export async function deleteFeedbackById(req, res) {
 
     try {
       const deletedFeedback = await Feedback.findOneAndDelete({
-        feedbackId: feedbackId,
+        _id: feedbackId,
       });
 
       if (deletedFeedback) {

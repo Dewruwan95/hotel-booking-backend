@@ -1,7 +1,7 @@
 import User from "../models/user.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { verifyAdmin } from "../utils/userVerification.js";
+import { verifyAdmin, verifyCustomer } from "../utils/userVerification.js";
 
 //------------------------------------------------------------------
 ///--------------------------- create user -------------------------
@@ -98,26 +98,56 @@ function generateSaltingText() {
 ///--------------------------- update user -------------------------
 //------------------------------------------------------------------
 export async function updateUser(req, res) {
-  try {
-    const updatedUser = await User.findOneAndUpdate(
-      { email: req.body.email },
-      req.body,
-      { new: true }
-    );
+  if (verifyAdmin(req)) {
+    try {
+      const updatedUser = await User.findOneAndUpdate(
+        { email: req.body.email },
+        req.body,
+        { new: true }
+      );
 
-    if (!updatedUser) {
-      return res.status(404).json({
-        message: "User Not Found",
-      });
-    } else {
-      res.status(200).json({
-        message: "User Updated Successfully",
+      if (!updatedUser) {
+        return res.status(404).json({
+          message: "User Not Found",
+        });
+      } else {
+        res.status(200).json({
+          message: "User Updated Successfully",
+        });
+      }
+    } catch (error) {
+      res.status(400).json({
+        message: "User Updation Failed",
       });
     }
-  } catch (error) {
-    res.status(400).json({
-      message: "User Updation Failed",
-    });
+  } else if (verifyCustomer(req)) {
+    const userUpdates = req.body;
+    // Remove fields restricted to admins if the user is a customer
+    delete userUpdates.type;
+    delete userUpdates.disabled;
+    delete userUpdates.emailVerifiey;
+
+    try {
+      const updatedUser = await User.findOneAndUpdate(
+        { email: req.body.email },
+        req.body,
+        { new: true }
+      );
+
+      if (!updatedUser) {
+        return res.status(404).json({
+          message: "User Not Found",
+        });
+      } else {
+        res.status(200).json({
+          message: "User Updated Successfully",
+        });
+      }
+    } catch (error) {
+      res.status(400).json({
+        message: "User Updation Failed",
+      });
+    }
   }
 }
 
