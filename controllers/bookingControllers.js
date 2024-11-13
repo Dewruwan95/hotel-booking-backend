@@ -42,6 +42,8 @@ export async function createBooking(req, res) {
 
 export async function createBookingByCategory(req, res) {
   if (verifyCustomer(req)) {
+    console.log(req.body);
+
     const bookingStart = new Date(req.body.start);
     const bookingEnd = new Date(req.body.end);
 
@@ -51,7 +53,7 @@ export async function createBookingByCategory(req, res) {
       end: { $gt: bookingStart },
     });
 
-    if (ReservedBookings) {
+    if (ReservedBookings.length > 0) {
       // get reserved room numbers
       const reservedRooms = ReservedBookings.map((booking) => booking.roomId);
 
@@ -111,7 +113,7 @@ export async function createBookingByCategory(req, res) {
         const newBooking = new Booking({
           bookingId: bookingId,
           roomId: availableRooms[0].roomNo,
-          email: req.user.email,
+          email: req.body.user.email,
           reason: req.body.reason,
           start: bookingStart,
           end: bookingEnd,
