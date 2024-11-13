@@ -1,4 +1,5 @@
 import Booking from "../models/booking.js";
+import Room from "../models/room.js";
 import { verifyAdmin, verifyCustomer } from "../utils/userVerification.js";
 
 //------------------------------------------------------------------
@@ -27,6 +28,107 @@ export async function createBooking(req, res) {
         message: "Booking creation failed",
         error: err,
       });
+    }
+  } else {
+    res.status(400).json({
+      message: "Unauthorized",
+    });
+  }
+}
+
+//------------------------------------------------------------------
+///------------------ create Booking using category-----------------
+//------------------------------------------------------------------
+
+export async function createBookingByCategory(req, res) {
+  if (verifyCustomer(req)) {
+    const bookingStart = new Date(req.body.start);
+    const bookingEnd = new Date(req.body.end);
+
+    // get reserved bookings within the selected date period
+    const ReservedBookings = await Booking.find({
+      start: { $lt: bookingEnd },
+      end: { $gt: bookingStart },
+    });
+
+    if (ReservedBookings) {
+      // get reserved room numbers
+      const reservedRooms = ReservedBookings.map((booking) => booking.roomId);
+
+      //get available rooms
+      const availableRooms = await Room.find({
+        roomNo: { $nin: reservedRooms },
+        category: req.body.category,
+      });
+
+      if (availableRooms.length === 0) {
+        res.status(400).json({
+          message: "No rooms available",
+        });
+      } else {
+        const startingId = 1362;
+
+        try {
+          const count = await Booking.countDocuments();
+          const bookingId = startingId + count;
+
+          // create new booking
+          const newBooking = new Booking({
+            bookingId: bookingId,
+            roomId: availableRooms[0].roomNo,
+            email: req.body.user.email,
+            reason: req.body.reason,
+            start: bookingStart,
+            end: bookingEnd,
+            notes: req.body.notes,
+          });
+
+          await newBooking.save();
+
+          res.status(200).json({
+            message: "Booking creation successful",
+          });
+        } catch (err) {
+          res.status(400).json({
+            message: "Booking creation failed",
+            error: err,
+          });
+        }
+      }
+    } else {
+      //get available rooms
+      const availableRooms = await Room.find({
+        category: req.body.category,
+      });
+
+      const startingId = 1362;
+
+      try {
+        const count = await Booking.countDocuments();
+        const bookingId = startingId + count;
+
+        // create new booking
+        const newBooking = new Booking({
+          bookingId: bookingId,
+          roomId: availableRooms[0].roomNo,
+          email: req.user.email,
+          reason: req.body.reason,
+          start: bookingStart,
+          end: bookingEnd,
+          notes: req.body.notes,
+        });
+
+        await newBooking.save();
+
+        res.status(200).json({
+          message: "Booking creation successful",
+        });
+      } catch (err) {
+        res.status(400).json({
+          message: "Booking creation failed",
+          error: err,
+        });
+      }
     }
   } else {
     res.status(400).json({

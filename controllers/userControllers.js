@@ -100,6 +100,8 @@ function generateSaltingText() {
 export async function updateUser(req, res) {
   if (verifyAdmin(req)) {
     try {
+      console.log(req.body);
+
       const updatedUser = await User.findOneAndUpdate(
         { email: req.body.email },
         req.body,
@@ -157,7 +159,24 @@ export async function updateUser(req, res) {
 export async function deleteUserByEmail(req, res) {
   if (verifyAdmin(req)) {
     const email = req.params.email;
+    const requesterType = req.body.user.type;
     try {
+      // Find the user to delete
+      const targetUser = await User.findOne({ email: email });
+
+      if (!targetUser) {
+        return res.status(404).json({
+          message: "User Not Found",
+        });
+      }
+
+      // Prevent deletion if the target user is an admin and the requester is not a super admin
+      if (targetUser.type === "admin" && requesterType !== "superAdmin") {
+        return res.status(403).json({
+          message: "Admins cannot delete other admins",
+        });
+      }
+
       const result = await User.deleteOne({ email: email });
 
       if (result.deletedCount === 0) {
