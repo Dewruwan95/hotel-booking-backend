@@ -42,15 +42,13 @@ export async function createBooking(req, res) {
 
 export async function createBookingByCategory(req, res) {
   if (verifyCustomer(req)) {
-    console.log(req.body);
-
     const bookingStart = new Date(req.body.start);
     const bookingEnd = new Date(req.body.end);
 
     // get reserved bookings within the selected date period
     const ReservedBookings = await Booking.find({
-      start: { $lt: bookingEnd },
-      end: { $gt: bookingStart },
+      start: { $lte: bookingEnd },
+      end: { $gte: bookingStart },
     });
 
     if (ReservedBookings.length > 0) {
@@ -65,7 +63,8 @@ export async function createBookingByCategory(req, res) {
 
       if (availableRooms.length === 0) {
         res.status(400).json({
-          message: "No rooms available",
+          message:
+            "No rooms available for selected period on selected category",
         });
       } else {
         const startingId = 1362;
