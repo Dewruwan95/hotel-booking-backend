@@ -59,6 +59,7 @@ export async function createBookingByCategory(req, res) {
       const availableRooms = await Room.find({
         roomNo: { $nin: reservedRooms },
         category: req.body.category,
+        available: true,
       });
 
       if (availableRooms.length === 0) {
