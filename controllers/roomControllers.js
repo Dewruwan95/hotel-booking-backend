@@ -103,13 +103,14 @@ export async function getRoomByCategory(req, res) {
 //------------------------------------------------------------------
 export async function updateRoomByNumber(req, res) {
   if (verifyAdmin(req)) {
-    const number = req.params.number;
+    const roomNo = req.params.roomNo;
 
     try {
-      const result = await Room.updateOne({ roomNo: number }, req.body, {
+      const result = await Room.findOneAndUpdate({ roomNo: roomNo }, req.body, {
         new: true,
       });
-      if (result.matchedCount > 0) {
+
+      if (result) {
         res.status(200).json({
           room: result,
         });

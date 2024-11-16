@@ -14,7 +14,8 @@ roomRouter.post("/", createRoom);
 roomRouter.get("/", getRooms);
 roomRouter.get("/category/:category", getRoomByCategory);
 roomRouter.get("/:number", getRoomByNumber);
-roomRouter.put("/:number", updateRoomByNumber);
+
+roomRouter.put("/:roomNo", updateRoomByNumber);
 roomRouter.delete("/:number", deleteRoomByNumber);
 
 export default roomRouter;
