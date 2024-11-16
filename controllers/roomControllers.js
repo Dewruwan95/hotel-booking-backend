@@ -55,21 +55,18 @@ export async function getRooms(req, res) {
 //------------------------------------------------------------------
 export async function getRoomByNumber(req, res) {
   const number = req.params.number;
-
   try {
     const result = await Room.findOne({ roomNo: number });
-    if (result) {
-      res.status(200).json({
-        room: result,
-      });
-    } else {
-      res.status(400).json({
-        message: "Room not found",
-      });
-    }
+    res.status(200).json({
+      exists: !!result, // true if room exists, false otherwise
+      room: result || null, // room data if exists, otherwise null
+      message: result ? "Room found" : "Room not found",
+    });
   } catch (error) {
-    res.status(400).json({
-      message: "Failed to get Room",
+    res.status(500).json({
+      exists: false,
+      room: null,
+      message: "Failed to get room",
     });
   }
 }
@@ -102,32 +99,26 @@ export async function getRoomByCategory(req, res) {
 ///---------------------- update room by number --------------------
 //------------------------------------------------------------------
 export async function updateRoomByNumber(req, res) {
-  if (verifyAdmin(req)) {
-    const roomNo = req.params.roomNo;
+  if (!verifyAdmin(req)) {
+    return res.status(403).json({ message: "Unauthorized" });
+  }
 
-    try {
-      const result = await Room.findOneAndUpdate({ roomNo: roomNo }, req.body, {
-        new: true,
-      });
+  try {
+    const result = await Room.findOneAndUpdate(
+      { roomNo: req.params.roomNo },
+      req.body,
+      { new: true }
+    );
 
-      if (result) {
-        res.status(200).json({
-          room: result,
-        });
-      } else {
-        res.status(400).json({
-          message: "Room not found",
-        });
-      }
-    } catch (error) {
-      res.status(400).json({
-        message: "Failed to update room",
-        error: error.message,
-      });
+    if (result) {
+      return res.status(200).json({ room: result });
     }
-  } else {
-    res.status(403).json({
-      message: "Unauthorized",
+
+    res.status(400).json({ message: "Room not found" });
+  } catch (error) {
+    res.status(400).json({
+      message: "Failed to update room",
+      error: error.message,
     });
   }
 }
