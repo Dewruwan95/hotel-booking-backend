@@ -253,3 +253,29 @@ export async function updateBookingById(req, res) {
     });
   }
 }
+
+//------------------------------------------------------------------
+///---------------------- delete booking by Id ---------------------
+//------------------------------------------------------------------
+export async function deleteBookingById(req, res) {
+  if (!verifyAdmin(req)) {
+    return res.status(400).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const deletedBooking = await Booking.findOneAndDelete({
+      bookingId: req.params.bookingId,
+    });
+
+    if (deletedBooking) {
+      return res.status(200).json({ message: "Booking deleted successfully" });
+    }
+
+    return res.status(400).json({ message: "Booking not found" });
+  } catch (err) {
+    return res.status(400).json({
+      message: "Booking deletion failed",
+      error: err.message,
+    });
+  }
+}

@@ -5,6 +5,7 @@ import {
   getBookingById,
   updateBookingById,
   createBookingByCategory,
+  deleteBookingById,
 } from "../controllers/bookingControllers.js";
 
 const bookingRouter = express.Router();
@@ -14,5 +15,6 @@ bookingRouter.get("/", getBookings);
 bookingRouter.get("/:bookingId", getBookingById);
 bookingRouter.put("/:bookingId", updateBookingById);
 bookingRouter.post("/:create-by-category", createBookingByCategory);
+bookingRouter.delete("/:bookingId", deleteBookingById);
 
 export default bookingRouter;
