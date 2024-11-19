@@ -80,6 +80,34 @@ export async function getUser(req, res) {
 }
 
 //------------------------------------------------------------------
+///---------------- get single users by email ----------------------
+//------------------------------------------------------------------
+export async function getUserByEmail(req, res) {
+  if (!verifyAdmin(req)) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const user = await User.findOne({ email: req.params.email });
+    if (!user) {
+      return res.status(404).json({ message: "User Not Found" });
+    }
+    res.status(200).json({
+      user: {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        whatsApp: user.whatsApp,
+        image: user.image,
+      },
+    });
+  } catch {
+    res.status(500).json({ message: "Error retrieving user" });
+  }
+}
+
+//------------------------------------------------------------------
 ///------------------- generate salting characters -----------------
 //------------------------------------------------------------------
 function generateSaltingText() {

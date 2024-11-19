@@ -39,6 +39,10 @@ const bookingSchema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const Booking = mongoose.model("bookings", bookingSchema);

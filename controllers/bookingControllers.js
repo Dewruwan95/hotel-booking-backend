@@ -45,8 +45,6 @@ export async function createBookingByCategory(req, res) {
   }
 
   try {
-    console.log("req.body", req.body);
-
     const { start, end, category, reason, notes, user } = req.body;
     const bookingStart = new Date(start);
     const bookingEnd = new Date(end);
@@ -55,14 +53,11 @@ export async function createBookingByCategory(req, res) {
     const ReservedBookings = await Booking.find({
       start: { $lte: bookingEnd },
       end: { $gte: bookingStart },
+      isDeleted: false,
     });
-
-    console.log("ReservedBookings", ReservedBookings);
 
     // Extract reserved room IDs
     const reservedRooms = ReservedBookings.map((booking) => booking.roomId);
-
-    console.log("reservedRooms", reservedRooms);
 
     // Fetch available rooms based on category and availability
     const availableRooms = await Room.find({
@@ -70,8 +65,6 @@ export async function createBookingByCategory(req, res) {
       category: category,
       available: true,
     });
-
-    console.log("availableRooms", availableRooms);
 
     if (availableRooms.length === 0) {
       return res.status(400).json({
@@ -82,7 +75,7 @@ export async function createBookingByCategory(req, res) {
 
     const startingId = 1362;
     const count = await Booking.countDocuments();
-    console.log("count", count);
+
     const bookingId = startingId + count + 1;
 
     // Create a new booking
@@ -96,18 +89,13 @@ export async function createBookingByCategory(req, res) {
       notes: notes,
     });
 
-    console.log("newBooking", newBooking);
-
     const savedBooking = await newBooking.save();
-
-    console.log("savedBooking", savedBooking);
 
     res.status(200).json({
       message: "Booking creation successful",
       booking: savedBooking,
     });
   } catch (error) {
-    console.error("Error creating booking:", error);
     res.status(500).json({
       message: "Booking creation failed",
       error: error.message,
@@ -124,11 +112,16 @@ export async function getBookings(req, res) {
 
     // if user is an admin
     if (verifyAdmin(req)) {
-      bookings = await Booking.find();
+      bookings = await Booking.find({ isDeleted: false }).sort({
+        bookingId: -1,
+      });
     }
     // if user is a customer
     else if (verifyCustomer(req)) {
-      bookings = await Booking.find({ email: req.user.email });
+      bookings = await Booking.find({
+        email: req.user.email,
+        isDeleted: false,
+      }).sort({ bookingId: -1 });
     } else {
       return res.status(400).json({
         message: "Unauthorized",
@@ -235,13 +228,17 @@ export async function updateBookingById(req, res) {
 //------------------------------------------------------------------
 export async function deleteBookingById(req, res) {
   if (!verifyAdmin(req)) {
-    return res.status(400).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: "Unauthorized" });
   }
 
   try {
-    const deletedBooking = await Booking.findOneAndDelete({
-      bookingId: req.params.bookingId,
-    });
+    const deletedBooking = await Booking.findOneAndUpdate(
+      {
+        bookingId: req.params.bookingId,
+      },
+      { isDeleted: true },
+      { new: true }
+    );
 
     if (deletedBooking) {
       return res.status(200).json({ message: "Booking deleted successfully" });
