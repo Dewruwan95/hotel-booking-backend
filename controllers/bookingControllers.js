@@ -46,6 +46,7 @@ export async function createBookingByCategory(req, res) {
 
   try {
     const { start, end, category, reason, notes, user } = req.body;
+
     const bookingStart = new Date(start);
     const bookingEnd = new Date(end);
 
@@ -119,7 +120,7 @@ export async function getBookings(req, res) {
     // if user is a customer
     else if (verifyCustomer(req)) {
       bookings = await Booking.find({
-        email: req.user.email,
+        email: req.body.user.email,
         isDeleted: false,
       }).sort({ bookingId: -1 });
     } else {

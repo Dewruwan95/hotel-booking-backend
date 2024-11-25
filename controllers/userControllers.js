@@ -159,7 +159,7 @@ export async function updateUser(req, res) {
 
     try {
       const updatedUser = await User.findOneAndUpdate(
-        { email: req.body.email },
+        { email: req.body.user.email },
         req.body,
         { new: true }
       );
