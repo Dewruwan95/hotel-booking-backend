@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { verifyAdmin, verifyCustomer } from "../utils/userVerification.js";
 import nodemailer from "nodemailer";
+import Otp from "../models/otp.js";
+import { generateOtp } from "../utils/generateOtp.js";
 
 //------------------------------------------------------------------
 ///--------------------------- create user -------------------------
@@ -24,13 +26,12 @@ export async function createUser(req, res) {
 
   try {
     await newUser.save();
-    res.status(201).json({
-      message: "User Created Successfully",
-    });
+
+    sendOtpEmail(req, res);
+
+    console.log("User created successfully");
   } catch (error) {
-    res.status(409).json({
-      message: "User Creation Failed",
-    });
+    console.log(error);
   }
 }
 
@@ -287,35 +288,75 @@ export async function loginUser(req, res) {
 }
 
 //------------------------------------------------------------------
-///------------------------- verify user email----------------------
+///--------------------------- send otp email-----------------------
 //------------------------------------------------------------------
-export async function sendEmail(req, res) {
+export async function sendOtpEmail(req, res) {
   const email = req.body.email;
-
-  // Configure the transporter
-  const transporter = nodemailer.createTransport({
-    service: "gmail", // Use 'gmail' as the service
-    auth: {
-      user: process.env.EMAIL, // Your Gmail address
-      pass: process.env.PASSWORD, // App password for Gmail
-    },
-  });
-
-  // Define the email message
-  const message = {
-    from: `"Hotel ABC" <${process.env.EMAIL}>`, // Sender's email
-    to: email, // Receiver's email
-    subject: "One Time Passcode", // Subject line
-    text: "Sample Email for OTP", // Plain text body
-  };
+  const otpCode = generateOtp();
 
   try {
+    // Save the OTP to the database
+    const newOtp = new Otp({ email: email, otp: otpCode });
+    await newOtp.save();
+
+    // Configure the transporter
+    const transporter = nodemailer.createTransport({
+      service: "gmail", // Use 'gmail' as the service
+      auth: {
+        user: process.env.EMAIL, // Your Gmail address
+        pass: process.env.PASSWORD, // App password for Gmail
+      },
+    });
+
+    // Define the email message
+    const message = {
+      from: `"Hotel ABC" <${process.env.EMAIL}>`, // Sender's email
+      to: email, // Receiver's email
+      subject: "One Time Passcode", // Subject line
+      text: `Your One Time Passcode is: ${otpCode} \nThis passcode will expire in 5 minutes`, // Plain text body
+    };
+
     // Send the email
     const info = await transporter.sendMail(message);
     console.log("Message sent: %s", info.messageId);
-    res.status(200).json({ message: "Email sent successfully" });
+
+    // Send response
+    return res.status(200).json({
+      message: "OTP code sent to your email successfully",
+    });
   } catch (error) {
     console.error("Error sending email:", error);
-    res.status(500).json({ error: "Failed to send email" });
+
+    return res.status(500).json({
+      message: "Failed to send OTP code",
+    });
+  }
+}
+
+//------------------------------------------------------------------
+///------------------------ validate otp code ----------------------
+//------------------------------------------------------------------
+export async function validateOtp(req, res) {
+  const email = req.body.email;
+  const otp = req.body.otp;
+
+  const otpList = await Otp.find({ email: email }).sort({ createdAt: -1 });
+  if (otpList.length === 0) {
+    return res.status(400).json({
+      message: "Invalid OTP",
+    });
+  }
+
+  const latestOtp = otpList[0];
+
+  if (latestOtp.otp === otp) {
+    await User.findOneAndUpdate({ email: email }, { emailVerify: true });
+    return res.status(200).json({
+      message: "Email Verified Successfully",
+    });
+  } else {
+    return res.status(400).json({
+      message: "Invalid OTP",
+    });
   }
 }

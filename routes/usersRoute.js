@@ -7,7 +7,8 @@ import {
   getAllUsers,
   getUserByEmail,
   getUser,
-  sendEmail,
+  sendOtpEmail,
+  validateOtp,
 } from "../controllers/userControllers.js";
 
 const userRouter = express.Router();
@@ -26,6 +27,8 @@ userRouter.delete("/:email", deleteUserByEmail);
 
 userRouter.post("/login", loginUser);
 
-userRouter.post("/email", sendEmail);
+userRouter.post("/send-otp", sendOtpEmail);
+
+userRouter.post("/validate-otp", validateOtp);
 
 export default userRouter;
