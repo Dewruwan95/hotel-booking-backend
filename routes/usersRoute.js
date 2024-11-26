@@ -7,6 +7,7 @@ import {
   getAllUsers,
   getUserByEmail,
   getUser,
+  sendEmail,
 } from "../controllers/userControllers.js";
 
 const userRouter = express.Router();
@@ -24,5 +25,7 @@ userRouter.put("/", updateUser);
 userRouter.delete("/:email", deleteUserByEmail);
 
 userRouter.post("/login", loginUser);
+
+userRouter.post("/email", sendEmail);
 
 export default userRouter;

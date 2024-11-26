@@ -2,6 +2,7 @@ import User from "../models/user.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { verifyAdmin, verifyCustomer } from "../utils/userVerification.js";
+import nodemailer from "nodemailer";
 
 //------------------------------------------------------------------
 ///--------------------------- create user -------------------------
@@ -282,5 +283,39 @@ export async function loginUser(req, res) {
       message: "Login failed",
       error: error,
     });
+  }
+}
+
+//------------------------------------------------------------------
+///------------------------- verify user email----------------------
+//------------------------------------------------------------------
+export async function sendEmail(req, res) {
+  const email = req.body.email;
+
+  // Configure the transporter
+  const transporter = nodemailer.createTransport({
+    service: "gmail", // Use 'gmail' as the service
+    auth: {
+      user: process.env.EMAIL, // Your Gmail address
+      pass: process.env.PASSWORD, // App password for Gmail
+    },
+  });
+
+  // Define the email message
+  const message = {
+    from: `"Hotel ABC" <${process.env.EMAIL}>`, // Sender's email
+    to: email, // Receiver's email
+    subject: "One Time Passcode", // Subject line
+    text: "Sample Email for OTP", // Plain text body
+  };
+
+  try {
+    // Send the email
+    const info = await transporter.sendMail(message);
+    console.log("Message sent: %s", info.messageId);
+    res.status(200).json({ message: "Email sent successfully" });
+  } catch (error) {
+    console.error("Error sending email:", error);
+    res.status(500).json({ error: "Failed to send email" });
   }
 }
