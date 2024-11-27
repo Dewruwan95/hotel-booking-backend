@@ -40,10 +40,20 @@ export async function createUser(req, res) {
 //------------------------------------------------------------------
 export async function getAllUsers(req, res) {
   if (verifyAdmin(req)) {
+    const page = parseInt(req.body.page) || 1; // Current page, default to 1
+    const pageSize = parseInt(req.body.pageSize) || 5; // Items per page, default to 5
+    const skip = (page - 1) * pageSize; // Number of items to skip
     try {
-      const users = await User.find();
+      const totalUsers = await User.countDocuments(); // Total number of users
+      const users = await User.find().skip(skip).limit(pageSize);
+
       res.json({
         users: users,
+        pagination: {
+          currentPage: page,
+          totalUsers: totalUsers,
+          totalPages: Math.ceil(totalUsers / pageSize),
+        },
       });
     } catch (error) {
       res.status(500).json({
@@ -65,9 +75,24 @@ export async function getUser(req, res) {
 
   try {
     if (user) {
+      const updatedUser = await User.findOne({ email: user.email });
+
+      if (!updatedUser) {
+        return res.status(404).json({
+          message: "User Not Found",
+        });
+      }
       res.status(200).json({
         message: "User Found",
-        user: user,
+        user: {
+          email: updatedUser.email,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+          phone: updatedUser.phone,
+          whatsApp: updatedUser.whatsApp,
+          image: updatedUser.image,
+          emailVerify: updatedUser.emailVerify,
+        },
       });
     } else {
       res.status(404).json({
@@ -102,6 +127,7 @@ export async function getUserByEmail(req, res) {
         phone: user.phone,
         whatsApp: user.whatsApp,
         image: user.image,
+        emailVerify: user.emailVerify,
       },
     });
   } catch {
@@ -130,8 +156,6 @@ function generateSaltingText() {
 export async function updateUser(req, res) {
   if (verifyAdmin(req)) {
     try {
-      console.log(req.body);
-
       const updatedUser = await User.findOneAndUpdate(
         { email: req.body.email },
         req.body,
@@ -262,6 +286,7 @@ export async function loginUser(req, res) {
           phone: user.phone,
           whatsApp: user.whatsApp,
           image: user.image,
+          emailVerify: user.emailVerify,
         };
 
         // Sign in with payload and secret key
@@ -341,6 +366,7 @@ export async function validateOtp(req, res) {
   const otp = req.body.otp;
 
   const otpList = await Otp.find({ email: email }).sort({ createdAt: -1 });
+
   if (otpList.length === 0) {
     return res.status(400).json({
       message: "Invalid OTP",

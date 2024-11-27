@@ -17,7 +17,7 @@ userRouter.post("/", createUser);
 
 userRouter.get("/", getUser);
 
-userRouter.get("/all", getAllUsers);
+userRouter.post("/all", getAllUsers);
 
 userRouter.get("/:email", getUserByEmail);
 
