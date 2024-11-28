@@ -31,27 +31,50 @@ export async function createFeedback(req, res) {
 ///--------------------------- get feedback ------------------------
 //------------------------------------------------------------------
 export async function getFeedback(req, res) {
+  let feedbacks;
   try {
-    let feedbacks;
-
     if (verifyAdmin(req)) {
       // Admin can see all verified and unverified reviews
-      feedbacks = await Feedback.find();
+      const page = parseInt(req.body.page) || 1; // Current page, default to 1
+      const pageSize = parseInt(req.body.pageSize) || 5; // Items per page, default to 5
+      const skip = (page - 1) * pageSize; // Number of items to skip
+      const totalFeedbacks = await Feedback.countDocuments(); // Total number of rooms
+      feedbacks = await Feedback.find()
+        .sort({
+          timestamp: -1,
+        })
+        .skip(skip)
+        .limit(pageSize);
+
+      return res.status(200).json({
+        feedbacks: feedbacks,
+        pagination: {
+          currentPage: page,
+          totalFeedbacks: totalFeedbacks,
+          totalPages: Math.ceil(totalFeedbacks / pageSize),
+        },
+      });
     } else if (verifyCustomer(req)) {
       feedbacks = await Feedback.find({
         $or: [
           { approved: true }, // All verified reviews
           { approved: false, email: req.body.user.email }, // Unverified reviews created by the user
         ],
+      }).sort({
+        timestamp: -1,
+      });
+      return res.status(200).json({
+        feedbacks: feedbacks,
       });
     } else {
       // If the user is not a registered customer, show only verified reviews
-      feedbacks = await Feedback.find({ approved: true });
+      feedbacks = await Feedback.find({ approved: true }).sort({
+        timestamp: -1,
+      });
+      return res.status(200).json({
+        feedbacks: feedbacks,
+      });
     }
-
-    res.status(200).json({
-      feedbacks: feedbacks,
-    });
   } catch (err) {
     res.status(400).json({
       message: "Failed to get feedbacks",

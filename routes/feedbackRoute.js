@@ -9,7 +9,7 @@ import {
 const feedbackRouter = express.Router();
 
 feedbackRouter.post("/", createFeedback);
-feedbackRouter.get("/", getFeedback);
+feedbackRouter.post("/all", getFeedback);
 feedbackRouter.put("/:feedbackId", updateFeedbackById);
 feedbackRouter.delete("/:feedbackId", deleteFeedbackById);
 
