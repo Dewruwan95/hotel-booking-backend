@@ -107,35 +107,47 @@ export async function createBookingByCategory(req, res) {
 //------------------------------------------------------------------
 ///------------------------- get Bookings  -------------------------
 //------------------------------------------------------------------
-export async function getBookings(req, res) {
+export async function getAllBookings(req, res) {
   try {
     let bookings;
 
     // if user is an admin
     if (verifyAdmin(req)) {
-      bookings = await Booking.find({ isDeleted: false }).sort({
-        bookingId: -1,
+      const page = parseInt(req.body.page) || 1; // Current page, default to 1
+      const pageSize = parseInt(req.body.pageSize) || 5; // Items per page, default to 5
+      const skip = (page - 1) * pageSize; // Number of items to skip
+      const totalBookings = await Booking.countDocuments({ isDeleted: false }); // Total number of bookings
+      bookings = await Booking.find({ isDeleted: false })
+        .sort({
+          bookingId: -1,
+        })
+        .skip(skip)
+        .limit(pageSize);
+
+      return res.status(200).json({
+        bookings: bookings,
+        pagination: {
+          currentPage: page,
+          totalBookings: totalBookings,
+          totalPages: Math.ceil(totalBookings / pageSize),
+        },
       });
-    }
-    // if user is a customer
-    else if (verifyCustomer(req)) {
+    } else if (verifyCustomer(req)) {
+      // if user is a customer
+
+      console.log(req.body);
+
       bookings = await Booking.find({
         email: req.body.user.email,
         isDeleted: false,
       }).sort({ bookingId: -1 });
-    } else {
-      return res.status(400).json({
-        message: "Unauthorized",
-      });
-    }
 
-    if (bookings && bookings.length > 0) {
-      res.status(200).json({
+      return res.status(200).json({
         bookings: bookings,
       });
     } else {
-      res.status(400).json({
-        message: "Bookings not found",
+      return res.status(400).json({
+        message: "Unauthorized",
       });
     }
   } catch (err) {

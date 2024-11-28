@@ -1,7 +1,7 @@
 import express from "express";
 import {
   createBooking,
-  getBookings,
+  getAllBookings,
   getBookingById,
   updateBookingById,
   createBookingByCategory,
@@ -11,7 +11,7 @@ import {
 const bookingRouter = express.Router();
 
 bookingRouter.post("/", createBooking);
-bookingRouter.get("/", getBookings);
+bookingRouter.post("/all", getAllBookings);
 bookingRouter.get("/:bookingId", getBookingById);
 bookingRouter.put("/:bookingId", updateBookingById);
 bookingRouter.post("/:create-by-category", createBookingByCategory);
