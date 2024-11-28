@@ -30,11 +30,38 @@ export async function createCategory(req, res) {
 ///-------------------------- get category -------------------------
 //------------------------------------------------------------------
 export async function getCategory(req, res) {
+  let categories;
   try {
-    const categories = await Category.find();
-    res.json({
-      categories: categories,
-    });
+    if (verifyAdmin(req)) {
+      const page = parseInt(req.body.page) || 1; // Current page, default to 1
+
+      const pageSize = parseInt(req.body.pageSize) || 5; // Items per page, default to 5
+
+      const skip = (page - 1) * pageSize; // Number of items to skip
+
+      const totalCategories = await Category.countDocuments(); // Total number of rooms
+
+      categories = await Category.find()
+        .sort({
+          name: 1,
+        })
+        .skip(skip)
+        .limit(pageSize);
+
+      return res.status(200).json({
+        categories: categories,
+        pagination: {
+          currentPage: page,
+          totalCategories: totalCategories,
+          totalPages: Math.ceil(totalCategories / pageSize),
+        },
+      });
+    } else {
+      categories = await Category.find().sort({ name: 1 });
+      return res.json({
+        categories: categories,
+      });
+    }
   } catch (error) {
     res.status(400).json({
       message: "Failed to get categories",

@@ -11,7 +11,7 @@ const categoryRouter = express.Router();
 
 categoryRouter.post("/", createCategory);
 
-categoryRouter.get("/", getCategory);
+categoryRouter.post("/all", getCategory);
 
 categoryRouter.get("/:name", getCategoryByName);
 
