@@ -31,11 +31,35 @@ export async function createEvent(req, res) {
 ///--------------------------- get events ---------------------------
 //------------------------------------------------------------------
 export async function getEvents(req, res) {
+  let events;
   try {
-    const events = await Event.find();
-    res.status(200).json({
-      events: events,
-    });
+    if (verifyAdmin(req)) {
+      const page = parseInt(req.body.page) || 1; // Current page, default to 1
+      const pageSize = parseInt(req.body.pageSize) || 5; // Items per page, default to 5
+      const skip = (page - 1) * pageSize; // Number of items to skip
+      const totalEvents = await Event.countDocuments(); // Total number of bookings
+
+      events = await Event.find()
+        .sort({
+          _id: -1,
+        })
+        .skip(skip)
+        .limit(pageSize);
+
+      return res.status(200).json({
+        events: events,
+        pagination: {
+          currentPage: page,
+          totalEvents: totalEvents,
+          totalPages: Math.ceil(totalEvents / pageSize),
+        },
+      });
+    } else {
+      events = await Event.find().sort({ _id: -1 });
+      return res.status(200).json({
+        events: events,
+      });
+    }
   } catch (err) {
     res.status(400).json({
       message: "Failed to get events",

@@ -10,7 +10,7 @@ import {
 const eventRouter = express.Router();
 
 eventRouter.post("/", createEvent);
-eventRouter.get("/", getEvents);
+eventRouter.post("/all", getEvents);
 eventRouter.get("/:eventId", getEventById);
 eventRouter.put("/:eventId", updateEventById);
 eventRouter.delete("/:eventId", deleteEventById);
