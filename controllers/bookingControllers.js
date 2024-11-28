@@ -134,9 +134,6 @@ export async function getAllBookings(req, res) {
       });
     } else if (verifyCustomer(req)) {
       // if user is a customer
-
-      console.log(req.body);
-
       bookings = await Booking.find({
         email: req.body.user.email,
         isDeleted: false,

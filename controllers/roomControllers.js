@@ -31,16 +31,34 @@ export async function createRoom(req, res) {
 ///---------------------------- get rooms --------------------------
 //------------------------------------------------------------------
 export async function getRooms(req, res) {
+  let rooms;
   try {
-    const rooms = await Room.find();
+    if (verifyAdmin(req)) {
+      const page = parseInt(req.body.page) || 1; // Current page, default to 1
+      const pageSize = parseInt(req.body.pageSize) || 5; // Items per page, default to 5
+      const skip = (page - 1) * pageSize; // Number of items to skip
+      const totalRooms = await Room.countDocuments(); // Total number of rooms
+      rooms = await Room.find()
+        .sort({
+          roomNo: 1,
+        })
+        .skip(skip)
+        .limit(pageSize);
 
-    if (rooms) {
-      res.json({
+      return res.status(200).json({
         rooms: rooms,
+        pagination: {
+          currentPage: page,
+          totalRooms: totalRooms,
+          totalPages: Math.ceil(totalRooms / pageSize),
+        },
       });
     } else {
-      res.status(400).json({
-        message: "Room not found",
+      rooms = await Room.find().sort({
+        roomNo: 1,
+      });
+      return res.json({
+        rooms: rooms,
       });
     }
   } catch (error) {

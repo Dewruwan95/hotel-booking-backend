@@ -11,7 +11,7 @@ import {
 const roomRouter = express.Router();
 
 roomRouter.post("/", createRoom);
-roomRouter.get("/", getRooms);
+roomRouter.post("/all", getRooms);
 roomRouter.get("/category/:category", getRoomByCategory);
 roomRouter.get("/:number", getRoomByNumber);
 
