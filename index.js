@@ -10,6 +10,7 @@ import { authenticateUser } from "./middlewares/userAuthentication.js";
 import bookingRouter from "./routes/bookingRoute.js";
 import feedbackRouter from "./routes/feedbackRoute.js";
 import cors from "cors";
+import inquiryRouter from "./routes/inquiryRoute.js";
 
 dotenv.config();
 const app = express();
@@ -36,6 +37,7 @@ app.use("/api/categories", categoryRouter);
 app.use("/api/rooms", roomRouter);
 app.use("/api/bookings", bookingRouter);
 app.use("/api/feedbacks", feedbackRouter);
+app.use("/api/inquiries", inquiryRouter);
 
 app.listen(5000, (req, res) => {
   console.log("Server is running on port 5000");
