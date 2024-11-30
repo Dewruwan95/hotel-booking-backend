@@ -5,8 +5,18 @@ import { verifyAdmin, verifyCustomer } from "../utils/userVerification.js";
 ///-------------------------- create feedback ----------------------
 //------------------------------------------------------------------
 export async function createFeedback(req, res) {
+  console.log(req.body);
+
   if (verifyCustomer(req)) {
-    const feedback = req.body;
+    const feedback = {
+      email: req.body.user.email,
+      name: req.body.user.firstName + " " + req.body.user.lastName,
+      bookingId: req.body.bookingId,
+      title: req.body.title,
+      description: req.body.description,
+      rating: req.body.rating,
+      image: req.body.image || " ",
+    };
     const newFeedback = new Feedback(feedback);
 
     try {
@@ -56,13 +66,11 @@ export async function getFeedback(req, res) {
       });
     } else if (verifyCustomer(req)) {
       feedbacks = await Feedback.find({
-        $or: [
-          { approved: true }, // All verified reviews
-          { approved: false, email: req.body.user.email }, // Unverified reviews created by the user
-        ],
+        email: req.body.user.email,
       }).sort({
         timestamp: -1,
       });
+
       return res.status(200).json({
         feedbacks: feedbacks,
       });
@@ -79,6 +87,32 @@ export async function getFeedback(req, res) {
     res.status(400).json({
       message: "Failed to get feedbacks",
       error: err,
+    });
+  }
+}
+
+//------------------------------------------------------------------
+///-------------------- get feedback by booking id------------------
+//------------------------------------------------------------------
+export async function getFeedbackByBookingId(req, res) {
+  const bookingId = req.params.bookingId;
+  try {
+    if (verifyCustomer(req)) {
+      const feedback = await Feedback.find({
+        bookingId: bookingId,
+      });
+      return res.status(200).json({
+        feedback: feedback,
+      });
+    } else {
+      return res.status(400).json({
+        message: "Unauthorized",
+      });
+    }
+  } catch (error) {
+    res.status(400).json({
+      message: "Failed to get feedbacks",
+      error: error,
     });
   }
 }

@@ -9,6 +9,10 @@ const feedbackSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  bookingId: {
+    type: Number,
+    required: true,
+  },
   image: {
     type: String,
   },
