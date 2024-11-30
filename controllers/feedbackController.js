@@ -15,7 +15,7 @@ export async function createFeedback(req, res) {
       title: req.body.title,
       description: req.body.description,
       rating: req.body.rating,
-      image: req.body.image || " ",
+      image: req.body.user.image,
     };
     const newFeedback = new Feedback(feedback);
 
