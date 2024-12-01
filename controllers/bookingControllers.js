@@ -105,6 +105,85 @@ export async function createBookingByCategory(req, res) {
 }
 
 //------------------------------------------------------------------
+///------------------ create Booking using room no -----------------
+//------------------------------------------------------------------
+export async function createBookingByRoom(req, res) {
+  if (!verifyCustomer(req)) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const { start, end, category, roomNo, reason, notes, user } = req.body;
+
+    const bookingStart = new Date(start);
+    const bookingEnd = new Date(end);
+
+    // Fetch reserved bookings within the selected date period
+    const ReservedBookings = await Booking.find({
+      start: { $lte: bookingEnd },
+      end: { $gte: bookingStart },
+      isDeleted: false,
+    });
+
+    // Extract reserved room IDs
+    const reservedRooms = ReservedBookings.map((booking) => booking.roomId);
+
+    // Fetch available rooms based on category and availability
+    const availableRooms = await Room.find({
+      roomNo: { $nin: reservedRooms },
+      category: category,
+      available: true,
+    });
+
+    if (availableRooms.length === 0) {
+      return res.status(400).json({
+        message:
+          "No rooms available for the selected period in the selected category.",
+      });
+    }
+
+    // Check if the selected room number exists in availableRooms
+    const isRoomAvailable = availableRooms.some(
+      (room) => room.roomNo === roomNo
+    );
+
+    if (!isRoomAvailable) {
+      return res.status(400).json({
+        message: "Selected room is not available for the selected period.",
+      });
+    }
+
+    const startingId = 1362;
+    const count = await Booking.countDocuments();
+
+    const bookingId = startingId + count + 1;
+
+    // Create a new booking
+    const newBooking = new Booking({
+      bookingId: bookingId,
+      roomId: roomNo,
+      email: user.email,
+      reason: reason,
+      start: bookingStart,
+      end: bookingEnd,
+      notes: notes,
+    });
+
+    const savedBooking = await newBooking.save();
+
+    res.status(200).json({
+      message: "Booking creation successful",
+      booking: savedBooking,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Booking creation failed",
+      error: error.message,
+    });
+  }
+}
+
+//------------------------------------------------------------------
 ///------------------------- get Bookings  -------------------------
 //------------------------------------------------------------------
 export async function getAllBookings(req, res) {
