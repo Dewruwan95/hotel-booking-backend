@@ -49,6 +49,12 @@ export async function getFeedback(req, res) {
       const pageSize = parseInt(req.body.pageSize) || 5; // Items per page, default to 5
       const skip = (page - 1) * pageSize; // Number of items to skip
       const totalFeedbacks = await Feedback.countDocuments(); // Total number of rooms
+      const totalVerifiedFeedbacks = await Feedback.countDocuments({
+        approved: true,
+      });
+      const totalPendingFeedbacks = await Feedback.countDocuments({
+        approved: false,
+      });
       feedbacks = await Feedback.find()
         .sort({
           timestamp: -1,
@@ -62,6 +68,11 @@ export async function getFeedback(req, res) {
           currentPage: page,
           totalFeedbacks: totalFeedbacks,
           totalPages: Math.ceil(totalFeedbacks / pageSize),
+        },
+        feedbacksSummary: {
+          totalFeedbacks: totalFeedbacks,
+          totalVerifiedFeedbacks: totalVerifiedFeedbacks,
+          totalPendingFeedbacks: totalPendingFeedbacks,
         },
       });
     } else if (verifyCustomer(req)) {
