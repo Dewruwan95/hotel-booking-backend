@@ -253,6 +253,62 @@ export async function getAllBookings(req, res) {
 }
 
 //------------------------------------------------------------------
+///----------------- get Bookings for dashboard  -------------------
+//------------------------------------------------------------------
+export async function getBookingsForDashboard(req, res) {
+  try {
+    // if user is not an admin
+    if (!verifyAdmin(req)) {
+      return res.status(400).json({
+        message: "Unauthorized",
+      });
+    }
+
+    const totalBookings = await Booking.countDocuments({ isDeleted: false }); // Total number of bookings
+    const totalPendingBookings = await Booking.countDocuments({
+      status: "pending",
+      isDeleted: false,
+    });
+    const totalConfirmedBookings = await Booking.countDocuments({
+      status: "confirmed",
+      isDeleted: false,
+    });
+    const totalCanceledBookings = await Booking.countDocuments({
+      status: "cancelled",
+      isDeleted: false,
+    });
+
+    const totalOngoingBookings = await Booking.countDocuments({
+      status: "confirmed",
+      end: { $gte: new Date() },
+      isDeleted: false,
+    });
+
+    const ongoingBookings = await Booking.find({
+      status: "confirmed",
+      end: { $gte: new Date() },
+      isDeleted: false,
+    });
+
+    return res.status(200).json({
+      ongoingBookings: ongoingBookings,
+      bookingsSummary: {
+        totalBookings: totalBookings,
+        totalOngoingBookings: totalOngoingBookings,
+        totalPendingBookings: totalPendingBookings,
+        totalConfirmedBookings: totalConfirmedBookings,
+        totalCanceledBookings: totalCanceledBookings,
+      },
+    });
+  } catch (err) {
+    res.status(400).json({
+      message: "Failed to get bookings",
+      error: err,
+    });
+  }
+}
+
+//------------------------------------------------------------------
 ///---------------------- get Bookings by Id -----------------------
 //------------------------------------------------------------------
 export async function getBookingById(req, res) {
