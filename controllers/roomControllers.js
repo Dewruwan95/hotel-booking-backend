@@ -38,6 +38,10 @@ export async function getRooms(req, res) {
       const pageSize = parseInt(req.body.pageSize) || 5; // Items per page, default to 5
       const skip = (page - 1) * pageSize; // Number of items to skip
       const totalRooms = await Room.countDocuments(); // Total number of rooms
+
+      // Fetch room summaries
+      const availableRooms = await Room.countDocuments({ available: true });
+      const notAvailableRooms = await Room.countDocuments({ available: false });
       rooms = await Room.find()
         .sort({
           roomNo: 1,
@@ -51,6 +55,11 @@ export async function getRooms(req, res) {
           currentPage: page,
           totalRooms: totalRooms,
           totalPages: Math.ceil(totalRooms / pageSize),
+        },
+        roomsSummary: {
+          totalRooms: totalRooms,
+          availableRooms: availableRooms,
+          notAvailableRooms: notAvailableRooms,
         },
       });
     } else {
