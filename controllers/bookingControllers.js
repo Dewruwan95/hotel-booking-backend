@@ -196,6 +196,18 @@ export async function getAllBookings(req, res) {
       const pageSize = parseInt(req.body.pageSize) || 5; // Items per page, default to 5
       const skip = (page - 1) * pageSize; // Number of items to skip
       const totalBookings = await Booking.countDocuments({ isDeleted: false }); // Total number of bookings
+      const totalPendingBookings = await Booking.countDocuments({
+        status: "pending",
+        isDeleted: false,
+      });
+      const totalConfirmedBookings = await Booking.countDocuments({
+        status: "confirmed",
+        isDeleted: false,
+      });
+      const totalCanceledBookings = await Booking.countDocuments({
+        status: "cancelled",
+        isDeleted: false,
+      });
       bookings = await Booking.find({ isDeleted: false })
         .sort({
           bookingId: -1,
@@ -209,6 +221,12 @@ export async function getAllBookings(req, res) {
           currentPage: page,
           totalBookings: totalBookings,
           totalPages: Math.ceil(totalBookings / pageSize),
+        },
+        bookingsSummary: {
+          totalBookings: totalBookings,
+          totalPendingBookings: totalPendingBookings,
+          totalConfirmedBookings: totalConfirmedBookings,
+          totalCanceledBookings: totalCanceledBookings,
         },
       });
     } else if (verifyCustomer(req)) {
