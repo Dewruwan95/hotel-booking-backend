@@ -55,6 +55,9 @@ export async function getCategory(req, res) {
           totalCategories: totalCategories,
           totalPages: Math.ceil(totalCategories / pageSize),
         },
+        categoriesSymmary: {
+          totalCategories: totalCategories,
+        },
       });
     } else {
       categories = await Category.find().sort({ name: 1 });
