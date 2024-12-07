@@ -53,6 +53,9 @@ export async function getEvents(req, res) {
           totalEvents: totalEvents,
           totalPages: Math.ceil(totalEvents / pageSize),
         },
+        eventsSummary: {
+          totalEvents: totalEvents,
+        },
       });
     } else {
       events = await Event.find().sort({ _id: -1 });
