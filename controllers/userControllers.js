@@ -45,6 +45,11 @@ export async function getAllUsers(req, res) {
     const skip = (page - 1) * pageSize; // Number of items to skip
     try {
       const totalUsers = await User.countDocuments(); // Total number of users
+      const totalActiveUsers = await User.countDocuments({ disabled: false });
+      const totalBannedUsers = await User.countDocuments({ disabled: true });
+      const totalEmailVerifiedUsers = await User.countDocuments({
+        emailVerify: true,
+      });
       const users = await User.find().skip(skip).limit(pageSize);
 
       res.json({
@@ -53,6 +58,12 @@ export async function getAllUsers(req, res) {
           currentPage: page,
           totalUsers: totalUsers,
           totalPages: Math.ceil(totalUsers / pageSize),
+        },
+        usersSummary: {
+          totalUsers: totalUsers,
+          totalActiveUsers: totalActiveUsers,
+          totalBannedUsers: totalBannedUsers,
+          totalEmailVerifiedUsers: totalEmailVerifiedUsers,
         },
       });
     } catch (error) {
