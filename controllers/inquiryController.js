@@ -44,6 +44,12 @@ export async function getInquiries(req, res) {
       const pageSize = parseInt(req.body.pageSize) || 5; // Items per page, default to 5
       const skip = (page - 1) * pageSize; // Number of items to skip
       const totalInquiries = await Inquiry.countDocuments(); // Total number of bookings
+      const totalPendingInquiries = await Inquiry.countDocuments({
+        status: "pending",
+      });
+      const totalResolvedInquiries = await Inquiry.countDocuments({
+        status: "resolved",
+      });
       inquiries = await Inquiry.find()
         .sort({
           timestamp: -1,
@@ -57,6 +63,11 @@ export async function getInquiries(req, res) {
           currentPage: page,
           totalInquiries: totalInquiries,
           totalPages: Math.ceil(totalInquiries / pageSize),
+        },
+        inquiriesSummary: {
+          totalInquiries: totalInquiries,
+          totalPendingInquiries: totalPendingInquiries,
+          totalResolvedInquiries: totalResolvedInquiries,
         },
       });
     }
